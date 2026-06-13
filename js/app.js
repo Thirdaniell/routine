@@ -158,11 +158,55 @@
     }
   }
 
+  // To-Do card
+  function renderTodos() {
+    const list = document.getElementById("todo-today-list");
+    const todos = getTodos(key);
+    if (todos.length === 0) {
+      list.innerHTML = `<div style="font-size:0.82rem;color:var(--text-dark-dim);font-style:italic;">Nothing on the list yet.</div>`;
+      return;
+    }
+    list.innerHTML = todos.map(t => `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" ${t.done ? "checked" : ""} data-toggle="${t.id}" style="width:16px;height:16px;accent-color:var(--sage-deep);">
+        <span style="flex:1;font-size:0.85rem;${t.done ? "text-decoration:line-through;color:var(--text-dark-dim);" : ""}">${t.text}</span>
+        <button data-del="${t.id}" style="background:none;border:none;color:var(--text-dark-dim);cursor:pointer;">✕</button>
+      </div>
+    `).join("");
+
+    list.querySelectorAll("[data-toggle]").forEach(cb => {
+      cb.addEventListener("change", () => {
+        toggleTodo(key, cb.dataset.toggle);
+        renderTodos();
+      });
+    });
+    list.querySelectorAll("[data-del]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        deleteTodo(key, btn.dataset.del);
+        renderTodos();
+      });
+    });
+  }
+
+  document.getElementById("todo-today-add").addEventListener("click", () => {
+    const input = document.getElementById("todo-today-input");
+    const text = input.value.trim();
+    if (!text) return;
+    addTodo(key, text);
+    input.value = "";
+    renderTodos();
+  });
+
+  document.getElementById("todo-today-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("todo-today-add").click();
+  });
+
   // ---------- Init ----------
   renderStreaks();
   renderSchedule();
   renderGymCard();
   renderMoneyCard();
+  renderTodos();
 
   bindCheck(document.getElementById("check-bible"), document.getElementById("stamp-bible"), "bible");
   bindCheck(document.getElementById("check-gym"), document.getElementById("stamp-gym"), "gym");
