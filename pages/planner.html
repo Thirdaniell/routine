@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Log — Planner</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .cal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .cal-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 600;
+    }
+    .cal-nav {
+      display: flex;
+      gap: 8px;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .cal-dow {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-light-dim);
+      text-align: center;
+      padding-bottom: 6px;
+    }
+    .cal-cell {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      min-height: 86px;
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 2px solid transparent;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .cal-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+    }
+    .cal-cell.outside {
+      opacity: 0.35;
+    }
+    .cal-cell.today {
+      border-color: var(--ochre);
+    }
+    .cal-cell .day-num {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .cal-cell .dots {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .dot.schedule { background: var(--ochre); }
+    .dot.todo { background: var(--rust); }
+    .dot.habits { background: var(--sage-deep); }
+
+    /* Day modal */
+    .day-modal {
+      max-width: 560px;
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+    .day-modal h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+    .subsection-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dark-dim);
+      margin: 16px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .subsection-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line-bone);
+    }
+    .sched-row, .todo-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .overlap-warning {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--rust);
+      margin-top: -2px;
+      margin-bottom: 6px;
+    }
+    .todo-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--sage-deep);
+    }
+    .todo-row .todo-text {
+      flex: 1;
+      font-size: 0.88rem;
+    }
+    .todo-row .todo-text.done {
+      text-decoration: line-through;
+      color: var(--text-dark-dim);
+    }
+    .push-btn {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid var(--line-bone);
+      border-radius: 2px;
+      padding: 3px 6px;
+      color: var(--text-dark-dim);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .push-btn:hover {
+      color: var(--ochre);
+      border-color: var(--ochre);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <header class="masthead">
+      <div>
+        <div class="masthead-meta">Personal Field Log</div>
+        <h1 class="masthead-title">Planner<span>.</span></h1>
+      </div>
+      <a href="../index.html" class="masthead-date" style="text-decoration:none;">← Back to Today</a>
+    </header>
+
+    <nav class="primary-nav">
+      <a href="../index.html">Today</a>
+      <a href="planner.html" class="active">Planner</a>
+      <a href="workout-routines.html">Workout Routines</a>
+      <a href="bible.html">Bible Study</a>
+      <a href="trading.html">Trading</a>
+      <a href="money.html">Money &amp; Credit</a>
+      <a href="food.html">Food</a>
+      <a href="weekly-review.html">Weekly Review</a>
+    </nav>
+
+    <p style="font-size:0.85rem;color:var(--text-light-dim);max-width:640px;margin-bottom:20px;">
+      Click any day to view or edit its schedule and to-do list. Ochre dots = scheduled items,
+      rust dots = open to-dos, sage dots = a fully completed habit day.
+    </p>
+
+    <div class="cal-header">
+      <div class="cal-title" id="cal-title"></div>
+      <div class="cal-nav">
+        <button class="btn btn-small" id="cal-prev">← Prev</button>
+        <button class="btn btn-small" id="cal-today">Today</button>
+        <button class="btn btn-small" id="cal-next">Next →</button>
+      </div>
+    </div>
+
+    <div class="cal-grid" id="cal-dow-row"></div>
+    <div class="cal-grid" id="cal-grid" style="margin-top:6px;"></div>
+
+    <div class="footer-note">The Log · A daily field record</div>
+  </div>
+
+  <!-- Day detail modal -->
+  <div class="modal-overlay" id="day-modal">
+    <div class="modal day-modal">
+      <h3 id="day-modal-title">Date</h3>
+
+      <div class="subsection-label">Schedule</div>
+      <div id="sched-list"></div>
+      <button class="btn btn-small" id="add-sched-row">+ Add time block</button>
+
+      <div class="subsection-label">To-do list</div>
+      <div id="todo-list"></div>
+      <div class="todo-row">
+        <input type="text" class="text-input" id="new-todo-input" placeholder="Add a to-do for this day...">
+        <button class="btn btn-small" id="add-todo-btn">Add</button>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-rust btn-small" id="day-modal-close">Close</button>
+        <button class="btn btn-small" id="day-modal-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../data/routines.js"></script>
+  <script src="../js/data.js"></script>
+  <script>
+    const DOW_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    let viewDate = new Date(); // first-of-month tracker
+    viewDate.setDate(1);
+
+    const dowRow = document.getElementById("cal-dow-row");
+    DOW_LABELS.forEach(d => {
+      const el = document.createElement("div");
+      el.className = "cal-dow";
+      el.textContent = d;
+      dowRow.appendChild(el);
+    });
+
+    function renderCalendar() {
+      document.getElementById("cal-title").textContent =
+        viewDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+      const grid = document.getElementById("cal-grid");
+      grid.innerHTML = "";
+
+      const year = viewDate.getFullYear();
+      const month = viewDate.getMonth();
+      const firstDow = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrevMonth = new Date(year, month, 0).getDate();
+      const todayStr = todayKey();
+
+      const cells = [];
+      // leading days from previous month
+      for (let i = 0; i < firstDow; i++) {
+        const d = daysInPrevMonth - firstDow + 1 + i;
+        cells.push({ date: new Date(year, month - 1, d), outside: true });
+      }
+      // this month
+      for (let d = 1; d <= daysInMonth; d++) {
+        cells.push({ date: new Date(year, month, d), outside: false });
+      }
+      // trailing days to fill 6 rows (42 cells)
+      while (cells.length < 42) {
+        const last = cells[cells.length - 1].date;
+        const next = new Date(last);
+        next.setDate(next.getDate() + 1);
+        cells.push({ date: next, outside: true });
+      }
+
+      cells.forEach(cell => {
+        const key = dateKey(cell.date);
+        const el = document.createElement("div");
+        el.className = "cal-cell" + (cell.outside ? " outside" : "") + (key === todayStr ? " today" : "");
+
+        const sched = getSchedule(key);
+        const todos = getTodos(key);
+        const dayData = getDay(key);
+        const allHabitsDone = HABIT_KEYS.every(h => dayData.habits && dayData.habits[h]);
+
+        let dots = "";
+        if (sched.length > 0) dots += `<span class="dot schedule" title="${sched.length} schedule items"></span>`;
+        const openTodos = todos.filter(t => !t.done).length;
+        if (openTodos > 0) dots += `<span class="dot todo" title="${openTodos} open to-dos"></span>`;
+        if (allHabitsDone) dots += `<span class="dot habits" title="All habits done"></span>`;
+
+        el.innerHTML = `
+          <div class="day-num">${cell.date.getDate()}</div>
+          <div class="dots">${dots}</div>
+        `;
+        el.addEventListener("click", () => openDayModal(key));
+        grid.appendChild(el);
+      });
+    }
+
+    document.getElementById("cal-prev").addEventListener("click", () => {
+      viewDate.setMonth(viewDate.getMonth() - 1);
+      renderCalendar();
+    });
+    document.getElementById("cal-next").addEventListener("click", () => {
+      viewDate.setMonth(viewDate.getMonth() + 1);
+      renderCalendar();
+    });
+    document.getElementById("cal-today").addEventListener("click", () => {
+      viewDate = new Date();
+      viewDate.setDate(1);
+      renderCalendar();
+    });
+
+    // ---------- Day modal ----------
+    const dayModal = document.getElementById("day-modal");
+    const schedList = document.getElementById("sched-list");
+    const todoList = document.getElementById("todo-list");
+    let activeKey = null;
+
+    function openDayModal(key) {
+      activeKey = key;
+      const d = new Date(key + "T00:00:00");
+      document.getElementById("day-modal-title").textContent =
+        d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+      renderSchedRows();
+      renderTodoRows();
+      dayModal.classList.add("open");
+    }
+
+    function renderSchedRows() {
+      const items = getSchedule(activeKey);
+      schedList.innerHTML = "";
+      items
+        .slice()
+        .sort((a, b) => a.time.localeCompare(b.time))
+        .forEach((item, idx) => {
+          const row = document.createElement("div");
+          row.className = "sched-row";
+          row.innerHTML = `
+            <input type="time" class="time-input" value="${item.time}" style="width:100px" data-field="time" data-idx="${idx}">
+            <input type="text" class="text-input" value="${item.label}" data-field="label" data-idx="${idx}" style="flex:1">
+            <input type="number" class="text-input" value="${item.duration || 30}" min="0" step="5" style="width:70px" title="Duration (min)" data-field="duration" data-idx="${idx}">
+            <button class="btn btn-rust btn-small" data-remove-sched="${idx}">✕</button>
+          `;
+          schedList.appendChild(row);
+
+          // live overlap check on time/duration change
+          row.querySelectorAll('[data-field="time"], [data-field="duration"]').forEach(input => {
+            input.addEventListener("change", () => checkRowOverlap(idx));
+          });
+        });
+    }
+
+    function checkRowOverlap(idx) {
+      const rows = Array.from(schedList.children);
+      // remove any existing warning under this row
+      const existingWarning = rows[idx]?.nextElementSibling;
+      if (existingWarning && existingWarning.classList.contains("overlap-warning")) {
+        existingWarning.remove();
+      }
+
+      const candidate = readRow(idx);
+      const allCandidates = rows.map((_, i) => readRow(i));
+      const overlap = findOverlap(allCandidates, candidate, idx);
+      if (overlap) {
+        const warn = document.createElement("div");
+        warn.className = "overlap-warning";
+        warn.textContent = `⚠ Overlaps with "${overlap.label}" at ${overlap.time}`;
+        rows[idx].after(warn);
+      }
+    }
+
+    function readRow(idx) {
+      const rows = Array.from(schedList.children).filter(r => r.classList.contains("sched-row"));
+      const row = rows[idx];
+      return {
+        time: row.querySelector('[data-field="time"]').value || "00:00",
+        label: row.querySelector('[data-field="label"]').value || "Untitled",
+        duration: parseInt(row.querySelector('[data-field="duration"]').value, 10) || 30,
+        done: false
+      };
+    }
+
+    document.getElementById("add-sched-row").addEventListener("click", () => {
+      const items = getSchedule(activeKey);
+      items.push({ time: "12:00", label: "New item", duration: 30, done: false });
+      setSchedule(activeKey, items);
+      renderSchedRows();
+    });
+
+    schedList.addEventListener("click", (e) => {
+      if (e.target.dataset.removeSched !== undefined) {
+        const rows = Array.from(schedList.children).filter(r => r.classList.contains("sched-row"));
+        const idx = parseInt(e.target.dataset.removeSched, 10);
+        const items = rows.map((_, i) => readRow(i));
+        items.splice(idx, 1);
+        setSchedule(activeKey, items);
+        renderSchedRows();
+      }
+    });
+
+    function renderTodoRows() {
+      const todos = getTodos(activeKey);
+      todoList.innerHTML = "";
+      if (todos.length === 0) {
+        const empty = document.createElement("div");
+        empty.style.fontSize = "0.82rem";
+        empty.style.color = "var(--text-dark-dim)";
+        empty.style.fontStyle = "italic";
+        empty.textContent = "No to-dos for this day yet.";
+        todoList.appendChild(empty);
+        return;
+      }
+      todos.forEach(todo => {
+        const row = document.createElement("div");
+        row.className = "todo-row";
+        row.innerHTML = `
+          <input type="checkbox" ${todo.done ? "checked" : ""} data-toggle="${todo.id}">
+          <span class="todo-text ${todo.done ? "done" : ""}">${todo.text}</span>
+          <button class="push-btn" data-push="${todo.id}">→ Tomorrow</button>
+          <button class="del-btn" data-del-todo="${todo.id}">✕</button>
+        `;
+        todoList.appendChild(row);
+      });
+    }
+
+    todoList.addEventListener("click", (e) => {
+      if (e.target.dataset.delTodo) {
+        deleteTodo(activeKey, e.target.dataset.delTodo);
+        renderTodoRows();
+        renderCalendar();
+      }
+      if (e.target.dataset.push) {
+        const d = new Date(activeKey + "T00:00:00");
+        d.setDate(d.getDate() + 1);
+        moveTodo(activeKey, dateKey(d), e.target.dataset.push);
+        renderTodoRows();
+        renderCalendar();
+      }
+    });
+
+    todoList.addEventListener("change", (e) => {
+      if (e.target.dataset.toggle) {
+        toggleTodo(activeKey, e.target.dataset.toggle);
+        renderTodoRows();
+        renderCalendar();
+      }
+    });
+
+    document.getElementById("add-todo-btn").addEventListener("click", () => {
+      const input = document.getElementById("new-todo-input");
+      const text = input.value.trim();
+      if (!text) return;
+      addTodo(activeKey, text);
+      input.value = "";
+      renderTodoRows();
+      renderCalendar();
+    });
+
+    document.getElementById("new-todo-input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("add-todo-btn").click();
+    });
+
+    document.getElementById("day-modal-close").addEventListener("click", () => {
+      dayModal.classList.remove("open");
+      renderCalendar();
+    });
+
+    document.getElementById("day-modal-save").addEventListener("click", () => {
+      const rows = Array.from(schedList.children).filter(r => r.classList.contains("sched-row"));
+      const items = rows.map((_, i) => readRow(i));
+      setSchedule(activeKey, items);
+      dayModal.classList.remove("open");
+      renderCalendar();
+    });
+
+    renderCalendar();
+  </script>
+</body>
+</html>
