@@ -24,6 +24,7 @@
     <!-- Primary nav -->
     <nav class="primary-nav">
       <a href="index.html" class="active">Today</a>
+      <a href="pages/planner.html">Planner</a>
       <a href="pages/workout-routines.html">Workout Routines</a>
       <a href="pages/bible.html">Bible Study</a>
       <a href="pages/trading.html">Trading</a>
@@ -136,6 +137,24 @@
             </div>
             <div class="ledger-card-body">
               Up by 6:00 AM, asleep by 10:30 PM. Consistency builds the rest.
+            </div>
+          </div>
+
+          <!-- To-Do -->
+          <div class="ledger-card">
+            <div class="ledger-card-head">
+              <div class="ledger-card-title">To-Do</div>
+              <div class="ledger-card-tag">Today</div>
+            </div>
+            <div class="ledger-card-body">
+              <div id="todo-today-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
+              <div style="display:flex;gap:6px;">
+                <input type="text" class="text-input" id="todo-today-input" placeholder="Add a to-do...">
+                <button class="btn btn-small" id="todo-today-add">Add</button>
+              </div>
+            </div>
+            <div class="ledger-card-footer">
+              <a class="ledger-card-link" href="pages/planner.html">Open planner →</a>
             </div>
           </div>
 
