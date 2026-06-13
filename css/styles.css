@@ -1,0 +1,548 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* Color tokens */
+  --ink: #1c1f1e;
+  --ink-soft: #262a29;
+  --bone: #ede8de;
+  --bone-soft: #f5f1e6;
+  --sage: #7c9a78;
+  --sage-deep: #5d7a5a;
+  --ochre: #d9a24b;
+  --rust: #b85c38;
+  --text-light: #f4f1e8;
+  --text-light-dim: #b8b5ac;
+  --text-dark: #2b2b28;
+  --text-dark-dim: #6b6862;
+  --line: rgba(244, 241, 232, 0.12);
+  --line-bone: rgba(43, 43, 40, 0.12);
+
+  /* Type tokens */
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Layout tokens */
+  --radius: 4px;
+  --container-max: 1180px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--ink);
+  color: var(--text-light);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ============ Layout ============ */
+.app-shell {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+
+/* ============ Header / Masthead ============ */
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 28px;
+}
+
+.masthead-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+.masthead-title span {
+  color: var(--ochre);
+}
+
+.masthead-meta {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-light-dim);
+}
+
+.masthead-date {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--text-light-dim);
+  text-align: right;
+}
+
+.masthead-date strong {
+  display: block;
+  font-size: 1.4rem;
+  color: var(--text-light);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* ============ Primary Nav ============ */
+.primary-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.primary-nav a {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text-light-dim);
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.primary-nav a:hover,
+.primary-nav a.active {
+  border-color: var(--ochre);
+  color: var(--ochre);
+}
+
+/* ============ Streak strip ============ */
+.streak-strip {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.streak-item {
+  font-family: var(--font-mono);
+}
+
+.streak-item .num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--sage);
+  display: block;
+}
+
+.streak-item .label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-light-dim);
+}
+
+/* ============ Main grid ============ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 860px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============ Section labels ============ */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-light-dim);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* ============ Timeline rail ============ */
+.timeline {
+  position: relative;
+  padding-left: 26px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--line);
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 18px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -26px;
+  top: 4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--text-light-dim);
+}
+
+.timeline-item.done::before {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+
+.timeline-item .time {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ochre);
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.timeline-item .label-text {
+  font-size: 0.92rem;
+  color: var(--text-light);
+}
+
+.timeline-item.done .label-text {
+  color: var(--text-light-dim);
+  text-decoration: line-through;
+  text-decoration-color: var(--line);
+}
+
+.timeline-edit-btn {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-light-dim);
+  background: none;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  width: 100%;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.timeline-edit-btn:hover {
+  color: var(--ochre);
+  border-color: var(--ochre);
+}
+
+/* ============ Ledger cards grid ============ */
+.ledger-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.ledger-card {
+  background: var(--bone);
+  color: var(--text-dark);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 150px;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ledger-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+.ledger-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ledger-card-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.ledger-card-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dark-dim);
+  border: 1px solid var(--line-bone);
+  border-radius: 2px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.ledger-card-body {
+  font-size: 0.88rem;
+  color: var(--text-dark-dim);
+  flex: 1;
+}
+
+.ledger-card-body strong {
+  color: var(--text-dark);
+}
+
+.ledger-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.ledger-card-link {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--sage-deep);
+  border-bottom: 1px solid var(--sage-deep);
+  padding-bottom: 1px;
+}
+
+.ledger-card-link:hover {
+  color: var(--rust);
+  border-color: var(--rust);
+}
+
+/* ============ Check control (the "stamp" trigger) ============ */
+.check-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 2px solid var(--text-dark);
+  border-radius: 50%;
+  cursor: pointer;
+  background: transparent;
+  flex-shrink: 0;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+
+.check-control:hover {
+  border-color: var(--sage-deep);
+}
+
+.check-control svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0;
+  transform: scale(0.6) rotate(-12deg);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.check-control.checked {
+  border-color: var(--sage-deep);
+}
+
+.check-control.checked svg {
+  opacity: 1;
+  transform: scale(1) rotate(-8deg);
+}
+
+/* ============ Stamp overlay ============ */
+.stamp {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: var(--sage-deep);
+  border: 2px solid var(--sage-deep);
+  border-radius: 3px;
+  padding: 3px 8px;
+  transform: rotate(-8deg);
+  opacity: 0;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  pointer-events: none;
+}
+
+.stamp.show {
+  opacity: 0.85;
+  transform: rotate(-8deg) scale(1);
+}
+
+/* ============ Inputs ============ */
+.text-input,
+.select-input,
+.time-input {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  background: var(--bone-soft);
+  border: 1px solid var(--line-bone);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  color: var(--text-dark);
+  width: 100%;
+}
+
+.text-input:focus,
+.select-input:focus,
+.time-input:focus {
+  outline: 2px solid var(--ochre);
+  outline-offset: 1px;
+}
+
+/* For dark-context inputs (timeline editor) */
+.dark-field .text-input,
+.dark-field .select-input,
+.dark-field .time-input {
+  background: var(--ink-soft);
+  border-color: var(--line);
+  color: var(--text-light);
+}
+
+/* ============ Buttons ============ */
+.btn {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  border: 1px solid currentColor;
+  cursor: pointer;
+  background: none;
+  color: var(--sage);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--sage);
+  color: var(--ink);
+}
+
+.btn.btn-rust {
+  color: var(--rust);
+}
+
+.btn.btn-rust:hover {
+  background: var(--rust);
+  color: var(--text-light);
+}
+
+.btn.btn-small {
+  padding: 6px 10px;
+  font-size: 0.68rem;
+}
+
+/* ============ Modal ============ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 31, 30, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 20px;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal {
+  background: var(--bone);
+  color: var(--text-dark);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal h3 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.modal label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dark-dim);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* ============ Footer ============ */
+.footer-note {
+  margin-top: 56px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--text-light-dim);
+  text-transform: uppercase;
+  text-align: center;
+}
