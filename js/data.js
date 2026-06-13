@@ -11,7 +11,8 @@ const STORAGE_KEYS = {
   CREDIT: "ftrack_credit",       // credit card config
   REVIEWS: "ftrack_reviews",     // weekly review entries
   INCOME: "ftrack_income",       // job income entries
-  SAVINGS: "ftrack_savings"      // savings goal + contributions
+  SAVINGS: "ftrack_savings",     // savings goal + contributions
+  TODOS: "ftrack_todos"          // per-day to-do items
 };
 
 const HABIT_KEYS = ["bible", "gym", "trading", "food", "money", "sleep"];
@@ -117,6 +118,81 @@ function setSchedule(key, items) {
   const all = getAllSchedules();
   all[key] = items;
   _write(STORAGE_KEYS.SCHEDULES, all);
+}
+
+// Convert "HH:MM" to minutes since midnight
+function timeToMinutes(t) {
+  const [h, m] = (t || "00:00").split(":").map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+// Check whether `candidate` (with optional .duration in minutes, default 1)
+// overlaps any item in `items` (excluding the item at excludeIndex).
+// Returns the overlapping item, or null if no overlap.
+function findOverlap(items, candidate, excludeIndex = -1) {
+  const cStart = timeToMinutes(candidate.time);
+  const cEnd = cStart + (Number(candidate.duration) || 1);
+  for (let i = 0; i < items.length; i++) {
+    if (i === excludeIndex) continue;
+    const item = items[i];
+    const iStart = timeToMinutes(item.time);
+    const iEnd = iStart + (Number(item.duration) || 1);
+    if (cStart < iEnd && iStart < cEnd) {
+      return item;
+    }
+  }
+  return null;
+}
+
+// ---------- to-do list (per day, untimed tasks) ----------
+
+function getAllTodos() {
+  return _read(STORAGE_KEYS.TODOS, {});
+}
+
+function getTodos(key) {
+  const all = getAllTodos();
+  return all[key] || [];
+}
+
+function setTodos(key, items) {
+  const all = getAllTodos();
+  all[key] = items;
+  _write(STORAGE_KEYS.TODOS, all);
+}
+
+function addTodo(key, text) {
+  const items = getTodos(key);
+  items.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    text,
+    done: false
+  });
+  setTodos(key, items);
+  return items;
+}
+
+function toggleTodo(key, id) {
+  const items = getTodos(key);
+  const item = items.find(t => t.id === id);
+  if (item) item.done = !item.done;
+  setTodos(key, items);
+}
+
+function deleteTodo(key, id) {
+  const items = getTodos(key).filter(t => t.id !== id);
+  setTodos(key, items);
+}
+
+// Move a to-do to a different date (for "push to later day")
+function moveTodo(fromKey, toKey, id) {
+  const fromItems = getTodos(fromKey);
+  const item = fromItems.find(t => t.id === id);
+  if (!item) return;
+  setTodos(fromKey, fromItems.filter(t => t.id !== id));
+  const toItems = getTodos(toKey);
+  toItems.push(item);
+  setTodos(toKey, toItems);
 }
 
 // ---------- expenses ----------
