@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Log — Today</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Masthead -->
+    <header class="masthead">
+      <div>
+        <div class="masthead-meta">Personal Field Log · Entry № <span id="today-year"></span></div>
+        <h1 class="masthead-title">Today<span>.</span></h1>
+      </div>
+      <div class="masthead-date">
+        <strong id="today-date"></strong>
+        Brampton, ON
+      </div>
+    </header>
+
+    <!-- Primary nav -->
+    <nav class="primary-nav">
+      <a href="index.html" class="active">Today</a>
+      <a href="pages/workout-routines.html">Workout Routines</a>
+      <a href="pages/bible.html">Bible Study</a>
+      <a href="pages/trading.html">Trading</a>
+      <a href="pages/money.html">Money &amp; Credit</a>
+      <a href="pages/food.html">Food</a>
+      <a href="pages/weekly-review.html">Weekly Review</a>
+    </nav>
+
+    <!-- Streak strip -->
+    <div class="streak-strip">
+      <div class="streak-item">
+        <span class="num" id="streak-overall">0</span>
+        <span class="label">Day streak (all habits)</span>
+      </div>
+      <div class="streak-item">
+        <span class="num" id="streak-bible">0%</span>
+        <span class="label">Bible · last 7 days</span>
+      </div>
+      <div class="streak-item">
+        <span class="num" id="streak-gym">0%</span>
+        <span class="label">Gym · last 7 days</span>
+      </div>
+      <div class="streak-item">
+        <span class="num" id="streak-trading">0%</span>
+        <span class="label">Trading discipline · last 7 days</span>
+      </div>
+    </div>
+
+    <!-- Main grid: timeline + ledger cards -->
+    <div class="main-grid">
+
+      <!-- Timeline rail -->
+      <div>
+        <div class="section-label">Today's schedule</div>
+        <div class="timeline" id="timeline-rail"></div>
+        <button class="btn btn-small" id="edit-schedule-btn" style="margin-top:6px;width:100%;">Edit schedule</button>
+      </div>
+
+      <!-- Ledger cards -->
+      <div>
+        <div class="section-label">Daily ledger</div>
+        <div class="ledger-grid">
+
+          <!-- Bible Study -->
+          <div class="ledger-card">
+            <div class="stamp" id="stamp-bible">Logged</div>
+            <div class="ledger-card-head">
+              <div class="ledger-card-title">Bible Study</div>
+              <div class="check-control" id="check-bible"></div>
+            </div>
+            <div class="ledger-card-body">
+              Spend time in the Word today — even 10 minutes counts.
+            </div>
+            <div class="ledger-card-footer">
+              <a class="ledger-card-link" href="pages/bible.html">Open log →</a>
+            </div>
+          </div>
+
+          <!-- Gym -->
+          <div class="ledger-card">
+            <div class="stamp" id="stamp-gym">Logged</div>
+            <div class="ledger-card-head">
+              <div class="ledger-card-title">Gym</div>
+              <div class="check-control" id="check-gym"></div>
+            </div>
+            <div class="ledger-card-body" id="gym-focus">
+              Loading today's focus...
+            </div>
+            <div class="ledger-card-footer">
+              <a class="ledger-card-link" id="gym-link" href="pages/workout-routines.html">View routine →</a>
+            </div>
+          </div>
+
+          <!-- Trading -->
+          <div class="ledger-card">
+            <div class="stamp" id="stamp-trading">Logged</div>
+            <div class="ledger-card-head">
+              <div class="ledger-card-title">Trading</div>
+              <div class="check-control" id="check-trading"></div>
+            </div>
+            <div class="ledger-card-body">
+              Followed your plan during London / NY AM session — no impulse entries.
+            </div>
+            <div class="ledger-card-footer">
+              <a class="ledger-card-link" href="pages/trading.html">Open journal →</a>
+            </div>
+          </div>
+
+          <!-- Food -->
+          <div class="ledger-card">
+            <div class="stamp" id="stamp-food">Logged</div>
+            <div class="ledger-card-head">
+              <div class="ledger-card-title">Food</div>
+              <div class="check-control" id="check-food"></div>
+            </div>
+            <div class="ledger-card-body">
+              Ate on schedule, no skipped meals or late-night junk.
+            </div>
+            <div class="ledger-card-footer">
+              <a class="ledger-card-link" href="pages/food.html">Open meal plan →</a>
+            </div>
+          </div>
+
+          <!-- Sleep -->
+          <div class="ledger-card">
+            <div class="stamp" id="stamp-sleep">Logged</div>
+            <div class="ledger-card-head">
+              <div class="ledger-card-title">Sleep &amp; Wake</div>
+              <div class="check-control" id="check-sleep"></div>
+            </div>
+            <div class="ledger-card-body">
+              Up by 6:00 AM, asleep by 10:30 PM. Consistency builds the rest.
+            </div>
+          </div>
+
+          <!-- Money & Credit -->
+          <div class="ledger-card">
+            <div class="ledger-card-head">
+              <div class="ledger-card-title">Money &amp; Credit</div>
+              <div class="ledger-card-tag">BMO $500</div>
+            </div>
+            <div class="ledger-card-body">
+              Spent today: <strong id="money-today">$0.00</strong><br>
+              Credit balance: <strong id="credit-balance">$0.00 / $500</strong>
+              <div style="height:6px;background:var(--line-bone);border-radius:3px;margin-top:8px;overflow:hidden;">
+                <div id="credit-bar-fill" style="height:100%;width:0%;background:var(--sage-deep);transition:width 0.2s ease;"></div>
+              </div>
+            </div>
+            <div class="ledger-card-footer">
+              <a class="ledger-card-link" href="pages/money.html">Log expense →</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-note">The Log · A daily field record</div>
+  </div>
+
+  <!-- Schedule editor modal -->
+  <div class="modal-overlay" id="schedule-modal">
+    <div class="modal">
+      <h3>Edit today's schedule</h3>
+      <div id="schedule-edit-list" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;"></div>
+      <button class="btn btn-small" id="add-schedule-row">+ Add item</button>
+      <div class="modal-actions">
+        <button class="btn btn-rust btn-small" id="schedule-cancel">Cancel</button>
+        <button class="btn btn-small" id="schedule-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="data/routines.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
