@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Log — Money &amp; Credit</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+    .bar-track {
+      height: 8px;
+      background: var(--line-bone);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .bar-fill {
+      height: 100%;
+      transition: width 0.2s ease;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+    }
+    .toggle-option {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 9px;
+      border: 1px solid var(--line-bone);
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: var(--text-dark-dim);
+      background: var(--bone-soft);
+      transition: all 0.15s ease;
+    }
+    .toggle-option.active-debit {
+      background: var(--sage);
+      color: var(--ink);
+      border-color: var(--sage);
+    }
+    .toggle-option.active-credit {
+      background: var(--rust);
+      color: var(--text-light);
+      border-color: var(--rust);
+    }
+    .ledger-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .ledger-table th {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dark-dim);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line-bone);
+    }
+    .ledger-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line-bone);
+    }
+    .ledger-table tr:last-child td {
+      border-bottom: none;
+    }
+    .method-pill {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .method-pill.debit {
+      background: rgba(124,154,120,0.2);
+      color: var(--sage-deep);
+    }
+    .method-pill.credit {
+      background: rgba(184,92,56,0.18);
+      color: var(--rust);
+    }
+    .del-btn {
+      background: none;
+      border: none;
+      color: var(--text-dark-dim);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .del-btn:hover {
+      color: var(--rust);
+    }
+    .section-block {
+      margin-bottom: 36px;
+    }
+    .empty-row td {
+      text-align: center;
+      color: var(--text-dark-dim);
+      font-style: italic;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <header class="masthead">
+      <div>
+        <div class="masthead-meta">Personal Field Log</div>
+        <h1 class="masthead-title">Money &amp; Credit<span>.</span></h1>
+      </div>
+      <a href="../index.html" class="masthead-date" style="text-decoration:none;">← Back to Today</a>
+    </header>
+
+    <nav class="primary-nav">
+      <a href="../index.html">Today</a>
+      <a href="workout-routines.html">Workout Routines</a>
+      <a href="bible.html">Bible Study</a>
+      <a href="trading.html">Trading</a>
+      <a href="money.html" class="active">Money &amp; Credit</a>
+      <a href="food.html">Food</a>
+      <a href="weekly-review.html">Weekly Review</a>
+    </nav>
+
+    <!-- Overview cards -->
+    <div class="overview-grid">
+      <div class="ledger-card">
+        <div class="ledger-card-head">
+          <div class="ledger-card-title">Credit Card</div>
+          <div class="ledger-card-tag" id="credit-name-tag">BMO Student</div>
+        </div>
+        <div class="ledger-card-body">
+          Balance: <strong id="ov-credit-balance">$0.00</strong> of <strong id="ov-credit-limit">$500</strong>
+          <div class="bar-track"><div class="bar-fill" id="ov-credit-bar"></div></div>
+          <div style="margin-top:8px;">
+            <span id="ov-credit-pct">0%</span> utilization
+          </div>
+        </div>
+      </div>
+
+      <div class="ledger-card">
+        <div class="ledger-card-head">
+          <div class="ledger-card-title">Income (Job)</div>
+          <div class="ledger-card-tag">Total</div>
+        </div>
+        <div class="ledger-card-body">
+          Total logged: <strong id="ov-income-total">$0.00</strong><br>
+          Total spent: <strong id="ov-spent-total">$0.00</strong><br>
+          Net: <strong id="ov-net">$0.00</strong>
+        </div>
+      </div>
+
+      <div class="ledger-card">
+        <div class="ledger-card-head">
+          <div class="ledger-card-title">Savings Goal</div>
+          <div class="ledger-card-tag" id="ov-savings-pct">0%</div>
+        </div>
+        <div class="ledger-card-body">
+          Saved: <strong id="ov-savings-total">$0.00</strong> of <strong id="ov-savings-goal">$0.00</strong>
+          <div class="bar-track"><div class="bar-fill" id="ov-savings-bar" style="background:var(--ochre);"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add expense -->
+    <div class="section-block">
+      <div class="section-label">Log an expense</div>
+      <div class="ledger-card" style="max-width:100%;">
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Date</label>
+            <input type="date" class="text-input" id="exp-date">
+          </div>
+          <div class="field-group" style="grid-column: span 2;">
+            <label>Description</label>
+            <input type="text" class="text-input" id="exp-desc" placeholder="e.g. Groceries, gas, Netflix">
+          </div>
+          <div class="field-group">
+            <label>Amount ($)</label>
+            <input type="number" class="text-input" id="exp-amount" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="field-group">
+            <label>Category</label>
+            <select class="select-input" id="exp-category">
+              <option>Food</option>
+              <option>Transport</option>
+              <option>Subscriptions</option>
+              <option>Shopping</option>
+              <option>Bills</option>
+              <option>School</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-group" style="max-width:260px;">
+          <label>Payment method</label>
+          <div class="toggle-group">
+            <div class="toggle-option active-debit" id="opt-debit" data-method="debit">Debit</div>
+            <div class="toggle-option" id="opt-credit" data-method="credit">Credit</div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top:14px;justify-content:flex-start;">
+          <button class="btn" id="add-expense-btn">+ Add expense</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expense ledger -->
+    <div class="section-block">
+      <div class="section-label">Expense ledger</div>
+      <table class="ledger-table">
+        <thead>
+          <tr><th>Date</th><th>Description</th><th>Category</th><th>Method</th><th>Amount</th><th></th></tr>
+        </thead>
+        <tbody id="expense-rows"></tbody>
+      </table>
+    </div>
+
+    <!-- Income -->
+    <div class="section-block">
+      <div class="section-label">Income (job, not trading)</div>
+      <div class="ledger-card" style="max-width:100%;margin-bottom:16px;">
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Date</label>
+            <input type="date" class="text-input" id="inc-date">
+          </div>
+          <div class="field-group">
+            <label>Source</label>
+            <input type="text" class="text-input" id="inc-source" placeholder="e.g. Part-time job">
+          </div>
+          <div class="field-group">
+            <label>Amount ($)</label>
+            <input type="number" class="text-input" id="inc-amount" min="0" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+        <div class="modal-actions" style="justify-content:flex-start;">
+          <button class="btn" id="add-income-btn">+ Add income</button>
+        </div>
+      </div>
+      <table class="ledger-table">
+        <thead>
+          <tr><th>Date</th><th>Source</th><th>Amount</th><th></th></tr>
+        </thead>
+        <tbody id="income-rows"></tbody>
+      </table>
+    </div>
+
+    <!-- Savings -->
+    <div class="section-block">
+      <div class="section-label">Savings</div>
+      <div class="ledger-card" style="max-width:100%;">
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Savings goal ($)</label>
+            <input type="number" class="text-input" id="savings-goal-input" min="0" step="1" placeholder="0">
+          </div>
+          <div class="field-group">
+            <label>Add contribution ($)</label>
+            <input type="number" class="text-input" id="savings-amount-input" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="field-group">
+            <label>Note (optional)</label>
+            <input type="text" class="text-input" id="savings-note-input" placeholder="e.g. Paycheck transfer">
+          </div>
+        </div>
+        <div class="modal-actions" style="justify-content:flex-start;gap:10px;">
+          <button class="btn" id="set-goal-btn">Set goal</button>
+          <button class="btn" id="add-saving-btn">+ Add contribution</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">The Log · A daily field record</div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script>
+    const expDateEl = document.getElementById("exp-date");
+    const incDateEl = document.getElementById("inc-date");
+    expDateEl.value = todayKey();
+    incDateEl.value = todayKey();
+
+    let selectedMethod = "debit";
+    document.getElementById("opt-debit").addEventListener("click", () => {
+      selectedMethod = "debit";
+      document.getElementById("opt-debit").classList.add("active-debit");
+      document.getElementById("opt-debit").classList.remove("active-credit");
+      document.getElementById("opt-credit").classList.remove("active-credit", "active-debit");
+    });
+    document.getElementById("opt-credit").addEventListener("click", () => {
+      selectedMethod = "credit";
+      document.getElementById("opt-credit").classList.add("active-credit");
+      document.getElementById("opt-debit").classList.remove("active-debit");
+    });
+
+    function fmt(n) {
+      return "$" + Number(n).toFixed(2);
+    }
+
+    function renderOverview() {
+      const config = getCreditConfig();
+      const balance = getCreditBalance();
+      const pct = Math.min(100, Math.round((balance / config.limit) * 100));
+      document.getElementById("credit-name-tag").textContent = config.name.split(" ")[0] + " Student";
+      document.getElementById("ov-credit-balance").textContent = fmt(balance);
+      document.getElementById("ov-credit-limit").textContent = "$" + config.limit;
+      document.getElementById("ov-credit-pct").textContent = pct + "%";
+      const bar = document.getElementById("ov-credit-bar");
+      bar.style.width = pct + "%";
+      bar.style.background = pct >= 70 ? "var(--rust)" : pct >= 40 ? "var(--ochre)" : "var(--sage-deep)";
+
+      const income = getTotalIncome();
+      const expenses = getExpenses().reduce((s, e) => s + e.amount, 0);
+      document.getElementById("ov-income-total").textContent = fmt(income);
+      document.getElementById("ov-spent-total").textContent = fmt(expenses);
+      document.getElementById("ov-net").textContent = fmt(income - expenses);
+
+      const savings = getSavings();
+      const savedTotal = getSavingsTotal();
+      const goal = savings.goal || 0;
+      const spct = goal > 0 ? Math.min(100, Math.round((savedTotal / goal) * 100)) : 0;
+      document.getElementById("ov-savings-total").textContent = fmt(savedTotal);
+      document.getElementById("ov-savings-goal").textContent = fmt(goal);
+      document.getElementById("ov-savings-pct").textContent = spct + "%";
+      document.getElementById("ov-savings-bar").style.width = spct + "%";
+      document.getElementById("savings-goal-input").placeholder = goal || "0";
+    }
+
+    function renderExpenses() {
+      const rows = document.getElementById("expense-rows");
+      const expenses = getExpenses();
+      if (expenses.length === 0) {
+        rows.innerHTML = `<tr class="empty-row"><td colspan="6">No expenses logged yet.</td></tr>`;
+        return;
+      }
+      rows.innerHTML = expenses.map(e => `
+        <tr>
+          <td>${e.date}</td>
+          <td>${e.description}</td>
+          <td>${e.category}</td>
+          <td><span class="method-pill ${e.method}">${e.method}</span></td>
+          <td>${fmt(e.amount)}</td>
+          <td><button class="del-btn" data-del="${e.id}">✕</button></td>
+        </tr>
+      `).join("");
+      rows.querySelectorAll("[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          deleteExpense(btn.dataset.del);
+          renderExpenses();
+          renderOverview();
+        });
+      });
+    }
+
+    function renderIncome() {
+      const rows = document.getElementById("income-rows");
+      const income = getIncome();
+      if (income.length === 0) {
+        rows.innerHTML = `<tr class="empty-row"><td colspan="4">No income logged yet.</td></tr>`;
+        return;
+      }
+      rows.innerHTML = income.map(e => `
+        <tr>
+          <td>${e.date}</td>
+          <td>${e.source}</td>
+          <td>${fmt(e.amount)}</td>
+          <td><button class="del-btn" data-del="${e.id}">✕</button></td>
+        </tr>
+      `).join("");
+      rows.querySelectorAll("[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          deleteIncome(btn.dataset.del);
+          renderIncome();
+          renderOverview();
+        });
+      });
+    }
+
+    document.getElementById("add-expense-btn").addEventListener("click", () => {
+      const amount = parseFloat(document.getElementById("exp-amount").value);
+      if (!amount || amount <= 0) return;
+      addExpense({
+        date: expDateEl.value || todayKey(),
+        description: document.getElementById("exp-desc").value || "Untitled",
+        amount: amount,
+        category: document.getElementById("exp-category").value,
+        method: selectedMethod
+      });
+      document.getElementById("exp-desc").value = "";
+      document.getElementById("exp-amount").value = "";
+      renderExpenses();
+      renderOverview();
+    });
+
+    document.getElementById("add-income-btn").addEventListener("click", () => {
+      const amount = parseFloat(document.getElementById("inc-amount").value);
+      if (!amount || amount <= 0) return;
+      addIncome({
+        date: incDateEl.value || todayKey(),
+        source: document.getElementById("inc-source").value || "Job",
+        amount: amount
+      });
+      document.getElementById("inc-source").value = "";
+      document.getElementById("inc-amount").value = "";
+      renderIncome();
+      renderOverview();
+    });
+
+    document.getElementById("set-goal-btn").addEventListener("click", () => {
+      const goal = parseFloat(document.getElementById("savings-goal-input").value);
+      if (isNaN(goal) || goal < 0) return;
+      setSavingsGoal(goal);
+      document.getElementById("savings-goal-input").value = "";
+      renderOverview();
+    });
+
+    document.getElementById("add-saving-btn").addEventListener("click", () => {
+      const amount = parseFloat(document.getElementById("savings-amount-input").value);
+      if (!amount || amount <= 0) return;
+      addSavingsContribution(amount, document.getElementById("savings-note-input").value);
+      document.getElementById("savings-amount-input").value = "";
+      document.getElementById("savings-note-input").value = "";
+      renderOverview();
+    });
+
+    renderOverview();
+    renderExpenses();
+    renderIncome();
+  </script>
+</body>
+</html>

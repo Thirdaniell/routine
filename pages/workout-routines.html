@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Log — Workout Routines</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .routine-block {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      scroll-margin-top: 20px;
+    }
+    .routine-block-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .routine-block-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    .routine-block-focus {
+      font-size: 0.85rem;
+      color: var(--text-dark-dim);
+      margin-bottom: 14px;
+    }
+    .exercise-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .exercise-table th {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dark-dim);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--line-bone);
+    }
+    .exercise-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--line-bone);
+    }
+    .exercise-table tr:last-child td {
+      border-bottom: none;
+    }
+    .exercise-table td.num {
+      font-family: var(--font-mono);
+      color: var(--sage-deep);
+      white-space: nowrap;
+    }
+    .day-tag-marker {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--line-bone);
+      border-radius: 2px;
+      padding: 3px 8px;
+      color: var(--text-dark-dim);
+    }
+    .rest-block {
+      background: var(--ink-soft);
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-light-dim);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <header class="masthead">
+      <div>
+        <div class="masthead-meta">Personal Field Log</div>
+        <h1 class="masthead-title">Workout Routines<span>.</span></h1>
+      </div>
+      <a href="../index.html" class="masthead-date" style="text-decoration:none;">← Back to Today</a>
+    </header>
+
+    <nav class="primary-nav">
+      <a href="../index.html">Today</a>
+      <a href="workout-routines.html" class="active">Workout Routines</a>
+      <a href="bible.html">Bible Study</a>
+      <a href="trading.html">Trading</a>
+      <a href="money.html">Money &amp; Credit</a>
+      <a href="food.html">Food</a>
+      <a href="weekly-review.html">Weekly Review</a>
+    </nav>
+
+    <p style="font-size:0.9rem;color:var(--text-light-dim);max-width:640px;margin-bottom:24px;">
+      5-day split built for strength, a leaner athletic build, V-taper, calisthenics progress, and stamina.
+      Core work is included every training day. Saturday &amp; Sunday are rest days — light walking or stretching optional.
+    </p>
+
+    <div id="routine-container"></div>
+
+    <div class="rest-block">Saturday &amp; Sunday — Rest / Active Recovery</div>
+
+    <div class="footer-note">The Log · A daily field record</div>
+  </div>
+
+  <script src="../data/routines.js"></script>
+  <script>
+    const container = document.getElementById("routine-container");
+    WORKOUT_SPLIT.forEach(day => {
+      const block = document.createElement("div");
+      block.className = "routine-block";
+      block.id = `day-${day.day}`;
+
+      const rows = day.exercises.map(ex => `
+        <tr>
+          <td>${ex.name}</td>
+          <td class="num">${ex.sets} sets</td>
+          <td class="num">${ex.reps}</td>
+        </tr>
+      `).join("");
+
+      block.innerHTML = `
+        <div class="routine-block-head">
+          <div class="routine-block-title">Day ${day.day} — ${day.name}</div>
+          <div class="day-tag-marker">${day.tag}</div>
+        </div>
+        <div class="routine-block-focus">${day.focus}</div>
+        <table class="exercise-table">
+          <thead>
+            <tr><th>Exercise</th><th>Sets</th><th>Reps</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+      container.appendChild(block);
+    });
+
+    // Scroll to today's anchor if linked from dashboard
+    if (window.location.hash) {
+      const target = document.querySelector(window.location.hash);
+      if (target) target.scrollIntoView({ behavior: "smooth" });
+    }
+  </script>
+</body>
+</html>
