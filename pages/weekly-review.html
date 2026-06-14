@@ -5,6 +5,146 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Log — Weekly Review</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .week-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .week-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    .week-nav {
+      display: flex;
+      gap: 8px;
+    }
+    .panel {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 22px;
+    }
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .habit-grid-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    .habit-grid-table th {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dark-dim);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--line-bone);
+      text-align: center;
+    }
+    .habit-grid-table th:first-child {
+      text-align: left;
+    }
+    .habit-grid-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--line-bone);
+      text-align: center;
+    }
+    .habit-grid-table td:first-child {
+      text-align: left;
+      font-weight: 600;
+    }
+    .habit-grid-table tr:last-child td {
+      border-bottom: none;
+    }
+    .cell-mark {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+    }
+    .cell-mark.done {
+      background: var(--sage-deep);
+    }
+    .cell-mark.miss {
+      background: var(--line-bone);
+    }
+    .pct-cell {
+      font-family: var(--font-mono);
+      color: var(--sage-deep);
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 22px;
+    }
+    .money-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .money-stat .num {
+      font-family: var(--font-mono);
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .money-stat .label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dark-dim);
+    }
+    textarea.journal-input {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      background: var(--bone-soft);
+      border: 1px solid var(--line-bone);
+      border-radius: var(--radius);
+      padding: 10px;
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+      color: var(--text-dark);
+    }
+    textarea.journal-input:focus {
+      outline: 2px solid var(--ochre);
+      outline-offset: 1px;
+    }
+    .journal-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dark-dim);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .journal-field {
+      margin-bottom: 16px;
+    }
+    .save-status {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--sage);
+      margin-left: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .save-status.show {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -19,6 +159,7 @@
 
     <nav class="primary-nav">
       <a href="../index.html">Today</a>
+      <a href="planner.html">Planner</a>
       <a href="workout-routines.html">Workout Routines</a>
       <a href="bible.html">Bible Study</a>
       <a href="trading.html">Trading</a>
@@ -27,20 +168,263 @@
       <a href="weekly-review.html" class="active">Weekly Review</a>
     </nav>
 
-    <div class="ledger-card" style="max-width:560px;">
-      <div class="ledger-card-head">
-        <div class="ledger-card-title">Coming up next</div>
-        <div class="ledger-card-tag">In progress</div>
+    <div class="week-header">
+      <div class="week-title" id="week-title">This week</div>
+      <div class="week-nav">
+        <button class="btn btn-small" id="week-prev">← Prev week</button>
+        <button class="btn btn-small" id="week-this">This week</button>
+        <button class="btn btn-small" id="week-next">Next week →</button>
       </div>
-      <div class="ledger-card-body">
-        Every Sunday, this page will pull your completion % for each habit
-        (Bible, Gym, Trading, Food, Sleep) over the past 7 days, plus a journal
-        with three prompts: what went well, what needs work, and what you'll
-        adjust next week. All entries are saved so you can look back over past weeks.
+    </div>
+
+    <!-- Habit grid -->
+    <div class="panel">
+      <div class="panel-title">Habit consistency</div>
+      <div style="overflow-x:auto;">
+        <table class="habit-grid-table" id="habit-grid"></table>
       </div>
+    </div>
+
+    <div class="two-col">
+      <!-- Gym -->
+      <div class="panel">
+        <div class="panel-title">Gym this week</div>
+        <table class="habit-grid-table" id="gym-table"></table>
+      </div>
+
+      <!-- Money -->
+      <div class="panel">
+        <div class="panel-title">Money this week</div>
+        <div class="money-stats">
+          <div class="money-stat">
+            <div class="num" id="wk-income">$0</div>
+            <div class="label">Income</div>
+          </div>
+          <div class="money-stat">
+            <div class="num" id="wk-expenses">$0</div>
+            <div class="label">Expenses</div>
+          </div>
+          <div class="money-stat">
+            <div class="num" id="wk-net">$0</div>
+            <div class="label">Net</div>
+          </div>
+          <div class="money-stat">
+            <div class="num" id="wk-savings">$0</div>
+            <div class="label">Saved</div>
+          </div>
+        </div>
+        <div id="category-chart"></div>
+      </div>
+    </div>
+
+    <!-- Journal -->
+    <div class="panel">
+      <div class="panel-title">Journal</div>
+      <div class="journal-field">
+        <label class="journal-label">What went well this week?</label>
+        <textarea class="journal-input" id="journal-wins" placeholder="Wins, breakthroughs, things that clicked..."></textarea>
+      </div>
+      <div class="journal-field">
+        <label class="journal-label">What needs work?</label>
+        <textarea class="journal-input" id="journal-struggles" placeholder="Where did discipline slip? What got in the way?"></textarea>
+      </div>
+      <div class="journal-field">
+        <label class="journal-label">What will you adjust next week?</label>
+        <textarea class="journal-input" id="journal-adjustments" placeholder="One or two concrete changes for next week..."></textarea>
+      </div>
+      <button class="btn btn-small" id="journal-save">Save journal</button>
+      <span class="save-status" id="journal-status">Saved ✓</span>
     </div>
 
     <div class="footer-note">The Log · A daily field record</div>
   </div>
+
+  <script src="../data/routines.js"></script>
+  <script src="../js/data.js"></script>
+  <script>
+    const HABIT_LABELS = {
+      bible: "Bible Study",
+      gym: "Gym",
+      trading: "Trading",
+      food: "Food",
+      sleep: "Sleep & Wake"
+    };
+    const DOW_SHORT = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const COLORS = {
+      sage: "#7c9a78",
+      sageDeep: "#5d7a5a",
+      ochre: "#d9a24b",
+      rust: "#b85c38",
+      lineBone: "#e3ddd0",
+      textDark: "#2b2b28",
+      textDim: "#6b6862"
+    };
+
+    let currentWeekKey = weekKeyFor(new Date());
+
+    function renderWeekHeader(weekDates) {
+      const start = new Date(weekDates[0] + "T00:00:00");
+      const end = new Date(weekDates[6] + "T00:00:00");
+      const fmt = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const isThisWeek = currentWeekKey === weekKeyFor(new Date());
+      document.getElementById("week-title").textContent =
+        (isThisWeek ? "This week — " : "") + `${fmt(start)} – ${fmt(end)}, ${end.getFullYear()}`;
+    }
+
+    function renderHabitGrid(weekDates) {
+      const table = document.getElementById("habit-grid");
+      let head = `<tr><th>Habit</th>`;
+      weekDates.forEach((k, i) => {
+        const d = new Date(k + "T00:00:00");
+        const isToday = k === todayKey();
+        head += `<th style="${isToday ? 'color:var(--ochre);' : ''}">${DOW_SHORT[i]}<br>${d.getDate()}</th>`;
+      });
+      head += `<th>%</th></tr>`;
+
+      let body = "";
+      HABIT_KEYS.forEach(habitKey => {
+        let row = `<tr><td>${HABIT_LABELS[habitKey]}</td>`;
+        weekDates.forEach(k => {
+          const day = getDay(k);
+          const done = day.habits && day.habits[habitKey];
+          row += `<td><span class="cell-mark ${done ? "done" : "miss"}"></span></td>`;
+        });
+        const pct = getHabitRateForDates(habitKey, weekDates);
+        row += `<td class="pct-cell">${pct}%</td></tr>`;
+        body += row;
+      });
+
+      table.innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
+    }
+
+    function renderGymTable(weekDates) {
+      const table = document.getElementById("gym-table");
+      let head = `<tr><th>Day</th><th>Focus</th><th>Done</th></tr>`;
+      let body = "";
+      weekDates.forEach(k => {
+        const d = new Date(k + "T00:00:00");
+        const split = getSplitDayForDate(d);
+        const day = getDay(k);
+        const done = day.habits && day.habits.gym;
+        const focus = split ? `${split.name}` : "Rest";
+        body += `
+          <tr>
+            <td>${d.toLocaleDateString("en-US", { weekday: "short" })}</td>
+            <td>${focus}</td>
+            <td><span class="cell-mark ${split ? (done ? "done" : "miss") : ""}" style="${split ? "" : "background:none;"}"></span></td>
+          </tr>
+        `;
+      });
+      table.innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
+    }
+
+    function renderMoney(weekDates) {
+      const expenses = getExpensesForDates(weekDates);
+      const income = getIncomeForDates(weekDates);
+      const savingsContribs = getSavingsContributionsForDates(weekDates);
+
+      const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+      const totalIncome = income.reduce((s, e) => s + e.amount, 0);
+      const totalSavings = savingsContribs.reduce((s, c) => s + c.amount, 0);
+
+      document.getElementById("wk-income").textContent = "$" + totalIncome.toFixed(2);
+      document.getElementById("wk-expenses").textContent = "$" + totalExpenses.toFixed(2);
+      document.getElementById("wk-net").textContent = "$" + (totalIncome - totalExpenses).toFixed(2);
+      document.getElementById("wk-savings").textContent = "$" + totalSavings.toFixed(2);
+
+      // spending by category
+      const byCategory = {};
+      expenses.forEach(e => {
+        byCategory[e.category] = (byCategory[e.category] || 0) + e.amount;
+      });
+      const items = Object.entries(byCategory)
+        .map(([label, value]) => ({ label, value: Math.round(value * 100) / 100 }))
+        .sort((a, b) => b.value - a.value);
+
+      const chartEl = document.getElementById("category-chart");
+      if (items.length === 0) {
+        chartEl.innerHTML = `<div style="font-size:0.85rem;color:var(--text-dark-dim);font-style:italic;">No expenses logged this week.</div>`;
+        return;
+      }
+      chartEl.innerHTML = barChart(items, { unit: "", prefix: "$", color: COLORS.rust });
+    }
+
+    // Simple horizontal bar chart, returns SVG markup
+    function barChart(items, opts = {}) {
+      const maxVal = Math.max(...items.map(i => i.value), 1);
+      const barHeight = 20;
+      const gap = 10;
+      const labelWidth = 110;
+      const chartWidth = 240;
+      const valueWidth = 60;
+      const totalWidth = labelWidth + chartWidth + valueWidth;
+      const height = items.length * (barHeight + gap);
+      const color = opts.color || COLORS.sageDeep;
+      const prefix = opts.prefix || "";
+      const unit = opts.unit || "";
+
+      let bars = "";
+      items.forEach((item, i) => {
+        const y = i * (barHeight + gap);
+        const w = Math.max(2, (item.value / maxVal) * chartWidth);
+        bars += `
+          <text x="0" y="${y + barHeight / 2 + 4}" font-family="monospace" font-size="11" fill="${COLORS.textDim}">${item.label}</text>
+          <rect x="${labelWidth}" y="${y}" width="${chartWidth}" height="${barHeight}" fill="${COLORS.lineBone}" rx="3"/>
+          <rect x="${labelWidth}" y="${y}" width="${w}" height="${barHeight}" fill="${color}" rx="3"/>
+          <text x="${labelWidth + chartWidth + 8}" y="${y + barHeight / 2 + 4}" font-family="monospace" font-size="11" fill="${COLORS.textDark}">${prefix}${item.value}${unit}</text>
+        `;
+      });
+
+      return `<svg viewBox="0 0 ${totalWidth} ${height}" width="100%" style="max-width:${totalWidth}px;display:block;">${bars}</svg>`;
+    }
+
+    // ---------- Journal ----------
+    function loadJournal() {
+      const review = getReview(currentWeekKey);
+      document.getElementById("journal-wins").value = review.wins || "";
+      document.getElementById("journal-struggles").value = review.struggles || "";
+      document.getElementById("journal-adjustments").value = review.adjustments || "";
+    }
+
+    document.getElementById("journal-save").addEventListener("click", () => {
+      setReview(currentWeekKey, {
+        wins: document.getElementById("journal-wins").value,
+        struggles: document.getElementById("journal-struggles").value,
+        adjustments: document.getElementById("journal-adjustments").value
+      });
+      const status = document.getElementById("journal-status");
+      status.classList.add("show");
+      setTimeout(() => status.classList.remove("show"), 1800);
+    });
+
+    // ---------- Week navigation ----------
+    function render() {
+      const weekDates = getWeekDates(currentWeekKey);
+      renderWeekHeader(weekDates);
+      renderHabitGrid(weekDates);
+      renderGymTable(weekDates);
+      renderMoney(weekDates);
+      loadJournal();
+    }
+
+    document.getElementById("week-prev").addEventListener("click", () => {
+      const d = new Date(currentWeekKey + "T00:00:00");
+      d.setDate(d.getDate() - 7);
+      currentWeekKey = weekKeyFor(d);
+      render();
+    });
+    document.getElementById("week-next").addEventListener("click", () => {
+      const d = new Date(currentWeekKey + "T00:00:00");
+      d.setDate(d.getDate() + 7);
+      currentWeekKey = weekKeyFor(d);
+      render();
+    });
+    document.getElementById("week-this").addEventListener("click", () => {
+      currentWeekKey = weekKeyFor(new Date());
+      render();
+    });
+
+    render();
+  </script>
 </body>
 </html>
