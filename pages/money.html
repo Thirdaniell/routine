@@ -182,6 +182,30 @@
       </div>
     </div>
 
+    <!-- Credit card payment -->
+    <div class="section-block">
+      <div class="section-label">Pay off credit card</div>
+      <div class="ledger-card" style="max-width:100%;">
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Date</label>
+            <input type="date" class="text-input" id="pay-date">
+          </div>
+          <div class="field-group">
+            <label>Payment amount ($)</label>
+            <input type="number" class="text-input" id="pay-amount" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="field-group">
+            <label>Note (optional)</label>
+            <input type="text" class="text-input" id="pay-note" placeholder="e.g. Monthly payment">
+          </div>
+        </div>
+        <div class="modal-actions" style="justify-content:flex-start;">
+          <button class="btn" id="add-payment-btn">+ Record payment</button>
+        </div>
+      </div>
+    </div>
+    
     <!-- Add expense -->
     <div class="section-block">
       <div class="section-label">Log an expense</div>
@@ -397,6 +421,25 @@
       });
     }
 
+    document.getElementById("pay-date").value = todayKey();
+
+    document.getElementById("add-payment-btn").addEventListener("click", () => {
+      const amount = parseFloat(document.getElementById("pay-amount").value);
+      if (!amount || amount <= 0) return;
+      // A payment is logged as a negative credit expense so it reduces the balance
+      addExpense({
+        date: document.getElementById("pay-date").value || todayKey(),
+        description: document.getElementById("pay-note").value || "Credit card payment",
+        amount: -Math.abs(amount),
+        category: "Payment",
+        method: "credit"
+      });
+      document.getElementById("pay-amount").value = "";
+      document.getElementById("pay-note").value = "";
+      renderExpenses();
+      renderOverview();
+    });
+    
     document.getElementById("add-expense-btn").addEventListener("click", () => {
       const amount = parseFloat(document.getElementById("exp-amount").value);
       if (!amount || amount <= 0) return;
