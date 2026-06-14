@@ -5,6 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Log — Bible Study</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .entry-list { display: flex; flex-direction: column; gap: 14px; }
+    .entry-card {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .entry-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .entry-date {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dark-dim);
+    }
+    .entry-passage {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .entry-notes {
+      font-size: 0.88rem;
+      color: var(--text-dark-dim);
+      margin-top: 6px;
+      white-space: pre-wrap;
+    }
+    .streak-row {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .streak-item .num {
+      font-family: var(--font-mono);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--sage);
+    }
+    .streak-item .label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-light-dim);
+    }
+    .form-panel {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+    .form-panel h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .del-btn {
+      background: none;
+      border: none;
+      color: var(--text-dark-dim);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .del-btn:hover { color: var(--rust); }
+    .empty-note {
+      font-size: 0.88rem;
+      color: var(--text-light-dim);
+      font-style: italic;
+    }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -19,6 +105,7 @@
 
     <nav class="primary-nav">
       <a href="../index.html">Today</a>
+      <a href="planner.html">Planner</a>
       <a href="workout-routines.html">Workout Routines</a>
       <a href="bible.html" class="active">Bible Study</a>
       <a href="trading.html">Trading</a>
@@ -27,19 +114,169 @@
       <a href="weekly-review.html">Weekly Review</a>
     </nav>
 
-    <div class="ledger-card" style="max-width:560px;">
-      <div class="ledger-card-head">
-        <div class="ledger-card-title">Coming up next</div>
-        <div class="ledger-card-tag">In progress</div>
+    <!-- Streak strip -->
+    <div class="streak-row">
+      <div class="streak-item">
+        <div class="num" id="bible-streak">0</div>
+        <div class="label">Day streak</div>
       </div>
-      <div class="ledger-card-body">
-        This page will hold your reading plan, study notes per entry, and a streak tracker
-        showing your consistency over time. For now, use the checkbox on the Today page
-        to mark your daily study as logged.
+      <div class="streak-item">
+        <div class="num" id="bible-week-pct">0%</div>
+        <div class="label">This week</div>
+      </div>
+      <div class="streak-item">
+        <div class="num" id="bible-total">0</div>
+        <div class="label">Total sessions</div>
       </div>
     </div>
 
+    <!-- Log a session -->
+    <div class="form-panel">
+      <h3>Log a session</h3>
+      <div class="form-row">
+        <div class="field-group">
+          <label>Date</label>
+          <input type="date" class="text-input" id="b-date">
+        </div>
+        <div class="field-group">
+          <label>Passage / Book</label>
+          <input type="text" class="text-input" id="b-passage" placeholder="e.g. Proverbs 3, Romans 8">
+        </div>
+        <div class="field-group">
+          <label>Time spent</label>
+          <select class="select-input" id="b-duration">
+            <option>10 min</option>
+            <option>20 min</option>
+            <option selected>30 min</option>
+            <option>45 min</option>
+            <option>1 hour</option>
+            <option>1+ hour</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group" style="margin-bottom:14px;">
+        <label>Notes / reflection (optional)</label>
+        <textarea class="text-input" id="b-notes" rows="3" placeholder="What stood out? What did God show you today?"></textarea>
+      </div>
+      <button class="btn" id="b-add-btn">+ Log session</button>
+    </div>
+
+    <!-- Entry log -->
+    <div class="section-label">Study log</div>
+    <div class="entry-list" id="b-entry-list"></div>
+
     <div class="footer-note">The Log · A daily field record</div>
   </div>
+
+  <script src="../js/data.js"></script>
+  <script>
+    const BIBLE_KEY = "ftrack_bible_entries";
+
+    function getBibleEntries() {
+      try {
+        const raw = localStorage.getItem(BIBLE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch { return []; }
+    }
+
+    function saveBibleEntries(entries) {
+      localStorage.setItem(BIBLE_KEY, JSON.stringify(entries));
+    }
+
+    function addBibleEntry(entry) {
+      const entries = getBibleEntries();
+      entries.unshift({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+        date: entry.date,
+        passage: entry.passage,
+        duration: entry.duration,
+        notes: entry.notes
+      });
+      saveBibleEntries(entries);
+      // also mark the habit for that day
+      setHabit(entry.date, "bible", true);
+    }
+
+    function deleteBibleEntry(id) {
+      const entries = getBibleEntries().filter(e => e.id !== id);
+      saveBibleEntries(entries);
+    }
+
+    function getBibleStreak() {
+      const entries = getBibleEntries();
+      const datesWithStudy = new Set(entries.map(e => e.date));
+      let streak = 0;
+      let cursor = new Date();
+      while (true) {
+        const k = dateKey(cursor);
+        if (!datesWithStudy.has(k)) break;
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      }
+      return streak;
+    }
+
+    function renderStats() {
+      const entries = getBibleEntries();
+      document.getElementById("bible-streak").textContent = getBibleStreak();
+      document.getElementById("bible-total").textContent = entries.length;
+
+      // this week %
+      const weekStart = weekKeyFor(new Date());
+      const weekDates = getWeekDates(weekStart);
+      const datesWithStudy = new Set(entries.map(e => e.date));
+      const doneDays = weekDates.filter(d => datesWithStudy.has(d)).length;
+      document.getElementById("bible-week-pct").textContent = Math.round((doneDays / 7) * 100) + "%";
+    }
+
+    function renderEntries() {
+      const list = document.getElementById("b-entry-list");
+      const entries = getBibleEntries();
+      if (entries.length === 0) {
+        list.innerHTML = `<div class="empty-note">No sessions logged yet. Start today.</div>`;
+        return;
+      }
+      list.innerHTML = entries.map(e => `
+        <div class="entry-card">
+          <div class="entry-card-head">
+            <div class="entry-passage">${e.passage || "—"}</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="entry-date">${e.date} · ${e.duration}</div>
+              <button class="del-btn" data-del="${e.id}">✕</button>
+            </div>
+          </div>
+          ${e.notes ? `<div class="entry-notes">${e.notes}</div>` : ""}
+        </div>
+      `).join("");
+
+      list.querySelectorAll("[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          deleteBibleEntry(btn.dataset.del);
+          renderEntries();
+          renderStats();
+        });
+      });
+    }
+
+    document.getElementById("b-date").value = todayKey();
+
+    document.getElementById("b-add-btn").addEventListener("click", () => {
+      const passage = document.getElementById("b-passage").value.trim();
+      if (!passage) return;
+      addBibleEntry({
+        date: document.getElementById("b-date").value || todayKey(),
+        passage,
+        duration: document.getElementById("b-duration").value,
+        notes: document.getElementById("b-notes").value.trim()
+      });
+      document.getElementById("b-passage").value = "";
+      document.getElementById("b-notes").value = "";
+      renderEntries();
+      renderStats();
+    });
+
+    renderStats();
+    renderEntries();
+  </script>
 </body>
 </html>
