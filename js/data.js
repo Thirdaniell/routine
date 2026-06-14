@@ -15,7 +15,7 @@ const STORAGE_KEYS = {
   TODOS: "ftrack_todos"          // per-day to-do items
 };
 
-const HABIT_KEYS = ["bible", "gym", "trading", "food", "money", "sleep"];
+const HABIT_KEYS = ["bible", "gym", "trading", "food", "sleep"];
 
 const DEFAULT_SCHEDULE = [
   { time: "06:00", label: "Wake up", done: false },
@@ -299,6 +299,46 @@ function deleteSavingsContribution(id) {
 function getSavingsTotal() {
   const savings = getSavings();
   return (savings.contributions || []).reduce((sum, c) => sum + c.amount, 0);
+}
+
+// Returns array of 7 dateKeys (Mon-Sun) for the week identified by weekKey
+// (weekKey is the Monday's dateKey, as produced by weekKeyFor)
+function getWeekDates(weekKey) {
+  const start = new Date(weekKey + "T00:00:00");
+  const keys = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    keys.push(dateKey(d));
+  }
+  return keys;
+}
+
+// Habit completion rate (%) for a given habit across a specific set of date keys
+function getHabitRateForDates(habitKey, dateKeys) {
+  const days = getAllDays();
+  let done = 0;
+  dateKeys.forEach(k => {
+    if (days[k] && days[k].habits && days[k].habits[habitKey]) done++;
+  });
+  return Math.round((done / dateKeys.length) * 100);
+}
+
+// Sum of expenses within a set of date keys, optionally grouped by category
+function getExpensesForDates(dateKeys) {
+  const set = new Set(dateKeys);
+  return getExpenses().filter(e => set.has(e.date));
+}
+
+function getIncomeForDates(dateKeys) {
+  const set = new Set(dateKeys);
+  return getIncome().filter(e => set.has(e.date));
+}
+
+function getSavingsContributionsForDates(dateKeys) {
+  const set = new Set(dateKeys);
+  const savings = getSavings();
+  return (savings.contributions || []).filter(c => set.has(c.date));
 }
 
 // ---------- weekly review ----------
