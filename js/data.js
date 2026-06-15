@@ -28,26 +28,6 @@ const DEFAULT_SCHEDULE = [
   { time: "22:30", label: "Wind down / sleep", done: false }
 ];
 
-const SATURDAY_SCHEDULE = [
-  { time: "08:00", label: "Wake up", done: false },
-  { time: "08:30", label: "Bible study", done: false },
-  { time: "09:30", label: "Breakfast", done: false },
-  { time: "11:30", label: "Head to work", done: false },
-  { time: "12:00", label: "Work shift starts", done: false },
-  { time: "21:00", label: "Work shift ends", done: false },
-  { time: "21:30", label: "Wind down / sleep prep", done: false }
-];
-
-const SUNDAY_SCHEDULE = [
-  { time: "08:00", label: "Wake up", done: false },
-  { time: "08:30", label: "Bible study / church", done: false },
-  { time: "10:00", label: "Breakfast", done: false },
-  { time: "12:00", label: "Meal prep / rest", done: false },
-  { time: "17:00", label: "Gym (optional)", done: false },
-  { time: "18:00", label: "Futures market opens — watch for setups", done: false },
-  { time: "22:30", label: "Wind down / sleep", done: false }
-];
-
 const DEFAULT_CREDIT = {
   name: "BMO Student Mastercard",
   limit: 500,
@@ -128,10 +108,7 @@ function getAllSchedules() {
 function getSchedule(key) {
   const all = getAllSchedules();
   if (!all[key]) {
-    const d = new Date(key + "T00:00:00");
-    const dow = d.getDay();
-    if (dow === 6) return SATURDAY_SCHEDULE.map(item => ({ ...item }));
-    if (dow === 0) return SUNDAY_SCHEDULE.map(item => ({ ...item }));
+    // clone default
     return DEFAULT_SCHEDULE.map(item => ({ ...item }));
   }
   return all[key];
