@@ -1,4 +1,4 @@
-# The Log — Personal Routine Tracker
+The Log — Personal Routine Tracker
 A personal field-log style dashboard to organize your day: Bible study, gym training,
 trading discipline, food, sleep, schedule, and money/credit management.
 Hosting on GitHub Pages
