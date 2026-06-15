@@ -5,6 +5,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Log — Trading</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .session-card {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 14px;
+    }
+    .session-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .session-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+    .session-meta {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dark-dim);
+    }
+    .checklist-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      margin-bottom: 6px;
+    }
+    .checklist-row input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--sage-deep);
+    }
+    .result-pill {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 10px;
+    }
+    .result-pill.win { background: rgba(124,154,120,0.2); color: var(--sage-deep); }
+    .result-pill.loss { background: rgba(184,92,56,0.18); color: var(--rust); }
+    .result-pill.be { background: rgba(217,162,75,0.18); color: var(--ochre); }
+    .result-pill.no-trade { background: rgba(107,104,98,0.15); color: var(--text-dark-dim); }
+    .form-panel {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+    .form-panel h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .del-btn { background: none; border: none; color: var(--text-dark-dim); cursor: pointer; }
+    .del-btn:hover { color: var(--rust); }
+    .stat-strip {
+      display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 28px;
+    }
+    .stat-item .num {
+      font-family: var(--font-mono);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--sage);
+    }
+    .stat-item .label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-light-dim);
+    }
+    .closed-notice {
+      background: var(--ink-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--text-light-dim);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -28,20 +134,197 @@
       <a href="weekly-review.html">Weekly Review</a>
     </nav>
 
-    <div class="ledger-card" style="max-width:560px;">
-      <div class="ledger-card-head">
-        <div class="ledger-card-title">Coming up next</div>
-        <div class="ledger-card-tag">In progress</div>
+    <!-- Market closed notice (Sat) -->
+    <div id="market-notice" style="display:none;" class="closed-notice"></div>
+
+    <!-- Stats -->
+    <div class="stat-strip">
+      <div class="stat-item">
+        <div class="num" id="t-total">0</div>
+        <div class="label">Sessions logged</div>
       </div>
-      <div class="ledger-card-body">
-        This page will hold a pre-session checklist (London / NY AM), space to log whether
-        you followed your ICT / iFVG Ultimate+ plan without impulse entries, and a link out
-        to your full Futures Trading Journal. For now, use the checkbox on the Today page
-        to mark whether you stuck to your plan today.
+      <div class="stat-item">
+        <div class="num" id="t-disciplined">0%</div>
+        <div class="label">Disciplined rate</div>
+      </div>
+      <div class="stat-item">
+        <div class="num" id="t-wins">0</div>
+        <div class="label">Wins</div>
+      </div>
+      <div class="stat-item">
+        <div class="num" id="t-losses">0</div>
+        <div class="label">Losses</div>
       </div>
     </div>
 
+    <!-- Log a session -->
+    <div class="form-panel" id="log-form">
+      <h3>Log a session</h3>
+      <div class="form-row">
+        <div class="field-group">
+          <label>Date</label>
+          <input type="date" class="text-input" id="t-date">
+        </div>
+        <div class="field-group">
+          <label>Session</label>
+          <select class="select-input" id="t-session">
+            <option>London</option>
+            <option>NY AM</option>
+            <option>Both</option>
+            <option>Sunday open watch</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Result</label>
+          <select class="select-input" id="t-result">
+            <option value="no-trade">No trade taken</option>
+            <option value="win">Win</option>
+            <option value="loss">Loss</option>
+            <option value="be">Break even</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <label style="font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dark-dim);display:block;margin-bottom:8px;">Pre-session checklist (ICT / iFVG discipline)</label>
+        <div class="checklist-grid" id="pre-checklist"></div>
+      </div>
+
+      <div class="field-group" style="margin-bottom:14px;">
+        <label>Notes</label>
+        <textarea class="text-input" id="t-notes" rows="3" placeholder="What did you see? Did you follow the model? Any mistakes?"></textarea>
+      </div>
+      <button class="btn" id="t-add-btn">+ Log session</button>
+    </div>
+
+    <!-- Session log -->
+    <div class="section-label">Session log</div>
+    <div id="t-session-list"></div>
+
     <div class="footer-note">The Log · A daily field record</div>
   </div>
+
+  <script src="../js/data.js"></script>
+  <script>
+    const TRADING_KEY = "ftrack_trading_sessions";
+    const PRE_CHECKS = [
+      "Checked HTF bias before session",
+      "Identified key liquidity levels",
+      "Waited for London / NY open range",
+      "Looked for iFVG setup confirmation",
+      "Defined entry, SL, and TP before entry",
+      "No revenge trading after a loss",
+      "Respected daily loss limit",
+      "Did not trade outside session hours"
+    ];
+
+    // Build checklist UI
+    const checklistEl = document.getElementById("pre-checklist");
+    PRE_CHECKS.forEach((label, i) => {
+      const row = document.createElement("div");
+      row.className = "checklist-row";
+      row.innerHTML = `
+        <input type="checkbox" id="pc-${i}">
+        <label for="pc-${i}" style="font-size:0.85rem;">${label}</label>
+      `;
+      checklistEl.appendChild(row);
+    });
+
+    function getSessions() {
+      try { return JSON.parse(localStorage.getItem(TRADING_KEY) || "[]"); } catch { return []; }
+    }
+
+    function saveSessions(sessions) {
+      localStorage.setItem(TRADING_KEY, JSON.stringify(sessions));
+    }
+
+    function renderStats() {
+      const sessions = getSessions();
+      const total = sessions.length;
+      const disciplined = sessions.filter(s => s.checksCompleted === PRE_CHECKS.length).length;
+      const wins = sessions.filter(s => s.result === "win").length;
+      const losses = sessions.filter(s => s.result === "loss").length;
+      document.getElementById("t-total").textContent = total;
+      document.getElementById("t-disciplined").textContent = total ? Math.round((disciplined / total) * 100) + "%" : "0%";
+      document.getElementById("t-wins").textContent = wins;
+      document.getElementById("t-losses").textContent = losses;
+    }
+
+    function renderSessions() {
+      const list = document.getElementById("t-session-list");
+      const sessions = getSessions();
+      if (sessions.length === 0) {
+        list.innerHTML = `<div style="font-size:0.88rem;color:var(--text-light-dim);font-style:italic;">No sessions logged yet.</div>`;
+        return;
+      }
+      list.innerHTML = sessions.map(s => {
+        const pillClass = { win: "win", loss: "loss", be: "be", "no-trade": "no-trade" }[s.result] || "no-trade";
+        const pillLabel = { win: "Win", loss: "Loss", be: "Break even", "no-trade": "No trade" }[s.result] || "—";
+        const checkPct = Math.round((s.checksCompleted / PRE_CHECKS.length) * 100);
+        return `
+          <div class="session-card">
+            <div class="session-head">
+              <div class="session-title">${s.session} session</div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="result-pill ${pillClass}">${pillLabel}</span>
+                <span class="session-meta">${s.date}</span>
+                <button class="del-btn" data-del="${s.id}">✕</button>
+              </div>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-dark-dim);margin-bottom:6px;">
+              Checklist: ${s.checksCompleted}/${PRE_CHECKS.length} (${checkPct}%)
+            </div>
+            ${s.notes ? `<div style="font-size:0.85rem;color:var(--text-dark-dim);white-space:pre-wrap;">${s.notes}</div>` : ""}
+          </div>
+        `;
+      }).join("");
+
+      list.querySelectorAll("[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const sessions = getSessions().filter(s => s.id !== btn.dataset.del);
+          saveSessions(sessions);
+          renderSessions();
+          renderStats();
+        });
+      });
+    }
+
+    // Market closed notice
+    const dow = new Date().getDay();
+    const notice = document.getElementById("market-notice");
+    if (dow === 6) {
+      notice.style.display = "block";
+      notice.textContent = "Futures market is closed on Saturday. Enjoy the work shift — no trades today.";
+    } else if (dow === 0) {
+      notice.style.display = "block";
+      notice.textContent = "Futures market opens at 6:00 PM today (Sunday). Use the day to plan your bias and key levels.";
+    }
+
+    document.getElementById("t-date").value = todayKey();
+
+    document.getElementById("t-add-btn").addEventListener("click", () => {
+      const checks = Array.from(document.querySelectorAll("#pre-checklist input[type='checkbox']"));
+      const checksCompleted = checks.filter(c => c.checked).length;
+      const sessions = getSessions();
+      sessions.unshift({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+        date: document.getElementById("t-date").value || todayKey(),
+        session: document.getElementById("t-session").value,
+        result: document.getElementById("t-result").value,
+        checksCompleted,
+        notes: document.getElementById("t-notes").value.trim()
+      });
+      saveSessions(sessions);
+      setHabit(document.getElementById("t-date").value || todayKey(), "trading", true);
+      // reset
+      checks.forEach(c => c.checked = false);
+      document.getElementById("t-notes").value = "";
+      renderSessions();
+      renderStats();
+    });
+
+    renderStats();
+    renderSessions();
+  </script>
 </body>
 </html>
