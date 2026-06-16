@@ -5,6 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Log — Food</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .meal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .meal-card {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .meal-card-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .meal-time {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--ochre);
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+    .meal-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+    .meal-check input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--sage-deep);
+    }
+    .meal-notes-input {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      background: var(--bone-soft);
+      border: 1px solid var(--line-bone);
+      border-radius: var(--radius);
+      padding: 7px 9px;
+      width: 100%;
+      margin-top: 8px;
+      color: var(--text-dark);
+      resize: none;
+    }
+    .meal-notes-input:focus {
+      outline: 2px solid var(--ochre);
+    }
+    .guidelines {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .guidelines h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .guide-item {
+      display: flex;
+      gap: 10px;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+      color: var(--text-dark-dim);
+    }
+    .guide-item .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--sage-deep);
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .save-status {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--sage);
+      margin-left: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .save-status.show { opacity: 1; }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -28,20 +117,105 @@
       <a href="weekly-review.html">Weekly Review</a>
     </nav>
 
-    <div class="ledger-card" style="max-width:560px;">
-      <div class="ledger-card-head">
-        <div class="ledger-card-title">Coming up next</div>
-        <div class="ledger-card-tag">In progress</div>
-      </div>
-      <div class="ledger-card-body">
-        This page will hold your meal schedule (breakfast/lunch/dinner times), a simple
-        "eat clean, on time" checklist that matches your gym goals (lean, athletic build),
-        and optional macro targets once we have your stats. For now, use the checkbox on
-        the Today page to mark whether you ate on schedule.
-      </div>
+    <p style="font-size:0.85rem;color:var(--text-light-dim);max-width:600px;margin-bottom:24px;">
+      Track your meals for today. Check off each meal when eaten on time. Notes save automatically.
+    </p>
+
+    <!-- Eating guidelines -->
+    <div class="guidelines">
+      <h3>Eating guidelines</h3>
+      <div class="guide-item"><div class="dot"></div><span>Eat within 1 hour of waking — don't skip breakfast before trading or gym.</span></div>
+      <div class="guide-item"><div class="dot"></div><span>Prioritize protein at every meal (chicken, eggs, Greek yogurt, fish, beef).</span></div>
+      <div class="guide-item"><div class="dot"></div><span>Complex carbs around training (oats, rice, potatoes) — reduce carbs at dinner if no gym.</span></div>
+      <div class="guide-item"><div class="dot"></div><span>No junk food after 8:00 PM — late-night eating hurts sleep quality and fat loss.</span></div>
+      <div class="guide-item"><div class="dot"></div><span>Drink at least 2.5–3L of water daily. Start the morning with a full glass.</span></div>
+      <div class="guide-item"><div class="dot"></div><span>Prep meals when possible — don't leave eating to chance on busy days.</span></div>
     </div>
+
+    <!-- Daily meal checklist -->
+    <div class="section-label">Today's meals</div>
+    <div class="meal-grid" id="meal-grid"></div>
+
+    <button class="btn" id="food-save-btn">Save today's log</button>
+    <span class="save-status" id="food-save-status">Saved ✓</span>
 
     <div class="footer-note">The Log · A daily field record</div>
   </div>
+
+  <script src="../js/data.js"></script>
+  <script>
+    const FOOD_KEY = "ftrack_food";
+    const today = new Date();
+    const key = todayKey();
+    const dow = today.getDay();
+
+    const MEALS = [
+      { id: "breakfast", label: "Breakfast", time: "7:00 AM", checks: ["Eaten on time", "High protein", "Complex carbs"] },
+      { id: "lunch",     label: "Lunch",     time: "12:30 PM", checks: ["Eaten on time", "High protein", "Not skipped"] },
+      { id: "dinner",    label: "Dinner",    time: "7:00 PM",  checks: ["Eaten on time", "Light carbs", "No junk food"] },
+      { id: "snacks",    label: "Snacks",    time: "As needed", checks: ["Healthy choice", "No late-night eating"] },
+      { id: "water",     label: "Hydration", time: "All day",  checks: ["2.5L+ water", "Morning glass done"] }
+    ];
+
+    function getFoodLog() {
+      try { return JSON.parse(localStorage.getItem(FOOD_KEY) || "{}"); } catch { return {}; }
+    }
+
+    function saveFoodLog(log) {
+      localStorage.setItem(FOOD_KEY, JSON.stringify(log));
+    }
+
+    const log = getFoodLog();
+    if (!log[key]) log[key] = {};
+
+    const grid = document.getElementById("meal-grid");
+
+    MEALS.forEach(meal => {
+      const saved = log[key][meal.id] || { checks: {}, notes: "" };
+      const card = document.createElement("div");
+      card.className = "meal-card";
+
+      const checksHTML = meal.checks.map((label, i) => `
+        <div class="meal-check">
+          <input type="checkbox" id="${meal.id}-c${i}" ${saved.checks[i] ? "checked" : ""} data-meal="${meal.id}" data-check="${i}">
+          <label for="${meal.id}-c${i}">${label}</label>
+        </div>
+      `).join("");
+
+      card.innerHTML = `
+        <div class="meal-card-title">${meal.label}</div>
+        <div class="meal-time">${meal.time}</div>
+        ${checksHTML}
+        <textarea class="meal-notes-input" rows="2" placeholder="What did you eat?" data-meal="${meal.id}">${saved.notes || ""}</textarea>
+      `;
+      grid.appendChild(card);
+    });
+
+    document.getElementById("food-save-btn").addEventListener("click", () => {
+      const currentLog = getFoodLog();
+      if (!currentLog[key]) currentLog[key] = {};
+
+      MEALS.forEach(meal => {
+        const checks = {};
+        document.querySelectorAll(`[data-meal="${meal.id}"][data-check]`).forEach(cb => {
+          checks[cb.dataset.check] = cb.checked;
+        });
+        const notes = document.querySelector(`textarea[data-meal="${meal.id}"]`)?.value || "";
+        currentLog[key][meal.id] = { checks, notes };
+      });
+
+      // mark food habit as done if breakfast + lunch + dinner all have at least one check
+      const allMealsDone = ["breakfast","lunch","dinner"].every(id => {
+        const m = currentLog[key][id];
+        return m && Object.values(m.checks).some(v => v);
+      });
+      setHabit(key, "food", allMealsDone);
+
+      saveFoodLog(currentLog);
+      const status = document.getElementById("food-save-status");
+      status.classList.add("show");
+      setTimeout(() => status.classList.remove("show"), 1800);
+    });
+  </script>
 </body>
 </html>
