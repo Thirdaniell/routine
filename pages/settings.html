@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Log — Settings</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .settings-section {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+    .settings-section h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .save-status {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--sage);
+      margin-left: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .save-status.show { opacity: 1; }
+    .danger-zone {
+      background: rgba(184,92,56,0.08);
+      border: 1px solid rgba(184,92,56,0.3);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+    .danger-zone h3 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--rust);
+    }
+    .danger-zone p {
+      font-size: 0.85rem;
+      color: var(--text-light-dim);
+      margin-bottom: 14px;
+    }
+    .workout-days-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .day-toggle {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line-bone);
+      cursor: pointer;
+      background: var(--bone-soft);
+      color: var(--text-dark-dim);
+      transition: all 0.15s ease;
+    }
+    .day-toggle.active {
+      background: var(--sage);
+      color: var(--ink);
+      border-color: var(--sage);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="masthead">
+      <div>
+        <div class="masthead-meta">Personal Field Log</div>
+        <h1 class="masthead-title">Settings<span>.</span></h1>
+      </div>
+      <a href="../index.html" class="masthead-date" style="text-decoration:none;">← Back to Today</a>
+    </header>
+    <nav class="primary-nav">
+      <a href="../index.html">Today</a>
+      <a href="planner.html">Planner</a>
+      <a href="workout-routines.html">Workout Routines</a>
+      <a href="gym-log.html">Gym Log</a>
+      <a href="bible.html">Bible Study</a>
+      <a href="trading.html">Trading</a>
+      <a href="money.html">Money &amp; Credit</a>
+      <a href="food.html">Food</a>
+      <a href="weekly-review.html">Weekly Review</a>
+      <a href="achievements.html">Achievements</a>
+      <a href="settings.html" class="active">Settings</a>
+    </nav>
+
+    <!-- Profile -->
+    <div class="settings-section">
+      <h3>Profile</h3>
+      <div class="settings-grid">
+        <div class="field-group">
+          <label>Your name</label>
+          <input type="text" class="text-input" id="s-name" placeholder="e.g. Daniel">
+        </div>
+        <div class="field-group">
+          <label>Location</label>
+          <input type="text" class="text-input" id="s-location" placeholder="e.g. Brampton, ON">
+        </div>
+      </div>
+      <button class="btn btn-small" id="save-profile-btn">Save</button>
+      <span class="save-status" id="profile-status">Saved ✓</span>
+    </div>
+
+    <!-- Sleep & wake -->
+    <div class="settings-section">
+      <h3>Sleep &amp; wake targets</h3>
+      <div class="settings-grid">
+        <div class="field-group">
+          <label>Wake up time</label>
+          <input type="time" class="time-input" id="s-wake" value="06:00">
+        </div>
+        <div class="field-group">
+          <label>Sleep time</label>
+          <input type="time" class="time-input" id="s-sleep" value="22:30">
+        </div>
+      </div>
+      <button class="btn btn-small" id="save-sleep-btn">Save</button>
+      <span class="save-status" id="sleep-status">Saved ✓</span>
+    </div>
+
+    <!-- Credit card -->
+    <div class="settings-section">
+      <h3>Credit card</h3>
+      <div class="settings-grid">
+        <div class="field-group">
+          <label>Card name</label>
+          <input type="text" class="text-input" id="s-card-name" placeholder="BMO Student Mastercard">
+        </div>
+        <div class="field-group">
+          <label>Credit limit ($)</label>
+          <input type="number" class="text-input" id="s-card-limit" min="0" step="50" placeholder="500">
+        </div>
+        <div class="field-group">
+          <label>Payment due day</label>
+          <input type="number" class="text-input" id="s-card-due" min="1" max="31" placeholder="1">
+        </div>
+      </div>
+      <button class="btn btn-small" id="save-credit-btn">Save</button>
+      <span class="save-status" id="credit-status">Saved ✓</span>
+    </div>
+
+    <!-- Workout days -->
+    <div class="settings-section">
+      <h3>Workout days</h3>
+      <p style="font-size:0.85rem;color:var(--text-dark-dim);margin-bottom:12px;">Choose which days of the week are training days vs rest days.</p>
+      <div class="workout-days-grid" id="workout-days-grid"></div>
+      <button class="btn btn-small" id="save-days-btn">Save</button>
+      <span class="save-status" id="days-status">Saved ✓</span>
+    </div>
+
+    <!-- Trading session times -->
+    <div class="settings-section">
+      <h3>Trading sessions</h3>
+      <div class="settings-grid">
+        <div class="field-group">
+          <label>London session start</label>
+          <input type="time" class="time-input" id="s-london" value="03:00">
+        </div>
+        <div class="field-group">
+          <label>NY AM session start</label>
+          <input type="time" class="time-input" id="s-nyam" value="09:30">
+        </div>
+      </div>
+      <button class="btn btn-small" id="save-trading-btn">Save</button>
+      <span class="save-status" id="trading-status">Saved ✓</span>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="danger-zone">
+      <h3>Danger zone</h3>
+      <p>These actions are permanent and cannot be undone.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn btn-rust btn-small" id="reset-xp-btn">Reset XP &amp; achievements</button>
+        <button class="btn btn-rust btn-small" id="reset-all-btn">Reset all local data</button>
+      </div>
+    </div>
+
+    <div class="footer-note">The Log · A daily field record</div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script>
+    const SETTINGS_KEY = "ftrack_settings";
+
+    function getSettings() {
+      try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"); } catch { return {}; }
+    }
+    function saveSettings(s) {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+    }
+
+    function showStatus(id) {
+      const el = document.getElementById(id);
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 1800);
+    }
+
+    // Load existing settings
+    const s = getSettings();
+    if (s.name) document.getElementById("s-name").value = s.name;
+    if (s.location) document.getElementById("s-location").value = s.location;
+    if (s.wake) document.getElementById("s-wake").value = s.wake;
+    if (s.sleep) document.getElementById("s-sleep").value = s.sleep;
+
+    const credit = getCreditConfig();
+    document.getElementById("s-card-name").value = credit.name || "BMO Student Mastercard";
+    document.getElementById("s-card-limit").value = credit.limit || 500;
+    document.getElementById("s-card-due").value = credit.dueDay || 1;
+
+    if (s.london) document.getElementById("s-london").value = s.london;
+    if (s.nyam) document.getElementById("s-nyam").value = s.nyam;
+
+    // Workout days
+    const DOW_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const defaultTrainingDays = new Set([1,2,3,4,5]); // Mon-Fri
+    const savedDays = s.trainingDays ? new Set(s.trainingDays) : defaultTrainingDays;
+    const daysGrid = document.getElementById("workout-days-grid");
+    DOW_LABELS.forEach((label, i) => {
+      const btn = document.createElement("div");
+      btn.className = "day-toggle" + (savedDays.has(i) ? " active" : "");
+      btn.textContent = label;
+      btn.dataset.dow = i;
+      btn.addEventListener("click", () => btn.classList.toggle("active"));
+      daysGrid.appendChild(btn);
+    });
+
+    // Save handlers
+    document.getElementById("save-profile-btn").addEventListener("click", () => {
+      const s = getSettings();
+      s.name = document.getElementById("s-name").value.trim();
+      s.location = document.getElementById("s-location").value.trim();
+      saveSettings(s);
+      showStatus("profile-status");
+    });
+
+    document.getElementById("save-sleep-btn").addEventListener("click", () => {
+      const s = getSettings();
+      s.wake = document.getElementById("s-wake").value;
+      s.sleep = document.getElementById("s-sleep").value;
+      saveSettings(s);
+      showStatus("sleep-status");
+    });
+
+    document.getElementById("save-credit-btn").addEventListener("click", () => {
+      setCreditConfig({
+        name: document.getElementById("s-card-name").value || "BMO Student Mastercard",
+        limit: parseFloat(document.getElementById("s-card-limit").value) || 500,
+        dueDay: parseInt(document.getElementById("s-card-due").value) || 1
+      });
+      showStatus("credit-status");
+    });
+
+    document.getElementById("save-days-btn").addEventListener("click", () => {
+      const s = getSettings();
+      const activeDays = Array.from(daysGrid.querySelectorAll(".day-toggle.active")).map(b => parseInt(b.dataset.dow));
+      s.trainingDays = activeDays;
+      saveSettings(s);
+      showStatus("days-status");
+    });
+
+    document.getElementById("save-trading-btn").addEventListener("click", () => {
+      const s = getSettings();
+      s.london = document.getElementById("s-london").value;
+      s.nyam = document.getElementById("s-nyam").value;
+      saveSettings(s);
+      showStatus("trading-status");
+    });
+
+    document.getElementById("reset-xp-btn").addEventListener("click", () => {
+      if (!confirm("Reset all XP, levels and achievements? This cannot be undone.")) return;
+      localStorage.removeItem("ftrack_gamify");
+      alert("XP and achievements reset.");
+    });
+
+    document.getElementById("reset-all-btn").addEventListener("click", () => {
+      if (!confirm("Delete ALL local data? This cannot be undone. Notion data is unaffected.")) return;
+      const keys = Object.keys(localStorage).filter(k => k.startsWith("ftrack_"));
+      keys.forEach(k => localStorage.removeItem(k));
+      alert("All local data cleared.");
+      window.location.href = "../index.html";
+    });
+  </script>
+</body>
+</html>
