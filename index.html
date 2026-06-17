@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Log — Today</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1c1f1e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="The Log">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
   <div class="app-shell">
@@ -212,6 +218,13 @@
         el.innerHTML = "<strong>Futures open at 6:00 PM.</strong><br>Review your bias and plan setups before the open.";
       }
     })();
+  </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/routine/sw.js")
+        .then(() => console.log("SW registered"))
+        .catch(e => console.warn("SW failed:", e));
+    }
   </script>
 </body>
 </html>
