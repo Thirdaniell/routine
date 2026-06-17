@@ -24,7 +24,7 @@
     items
       .slice()
       .sort((a, b) => a.time.localeCompare(b.time))
-      .forEach((item, idx) => {
+      .forEach((item) => {
         const el = document.createElement("div");
         el.className = "timeline-item" + (item.done ? " done" : "");
         el.innerHTML = `
@@ -97,29 +97,37 @@
     renderSchedule();
   });
 
-  // ---------- Ledger cards ----------
-  const day = getDay(key);
+  // ---------- Habit checkboxes ----------
+  // Always read fresh from localStorage so logging a habit on another page
+  // (e.g. Bible Study) is reflected correctly when returning to Today.
 
   function checkIcon() {
     return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
   }
 
-  function bindCheck(controlEl, stampEl, habitKey) {
-    const update = (val) => {
+  function refreshAllChecks() {
+    const day = getDay(key); // always read fresh
+    ["bible", "gym", "trading", "food", "sleep"].forEach(habitKey => {
+      const controlEl = document.getElementById(`check-${habitKey}`);
+      const stampEl = document.getElementById(`stamp-${habitKey}`);
+      if (!controlEl) return;
+      const val = !!(day.habits && day.habits[habitKey]);
       controlEl.classList.toggle("checked", val);
       if (stampEl) stampEl.classList.toggle("show", val);
-    };
-    update(day.habits[habitKey]);
+    });
+    renderStreaks();
+  }
+
+  function bindCheck(controlEl, stampEl, habitKey) {
     controlEl.addEventListener("click", () => {
-      const newVal = !day.habits[habitKey];
-      day.habits[habitKey] = newVal;
+      const day = getDay(key); // read fresh on every click
+      const newVal = !(day.habits && day.habits[habitKey]);
       setHabit(key, habitKey, newVal);
-      update(newVal);
-      renderStreaks();
+      refreshAllChecks();
     });
   }
 
-  // Gym card — compute today's split
+  // ---------- Gym card ----------
   function renderGymCard() {
     const split = getSplitDayForDate(today);
     const focusEl = document.getElementById("gym-focus");
@@ -135,30 +143,25 @@
     }
   }
 
-  // Money card — today's spend + credit utilization
+  // ---------- Money card ----------
   function renderMoneyCard() {
     const expenses = getExpenses();
     const todaysSpend = expenses
-      .filter(e => e.date === key)
+      .filter(e => e.date === key && e.method !== "payment")
       .reduce((sum, e) => sum + e.amount, 0);
     document.getElementById("money-today").textContent = `$${todaysSpend.toFixed(2)}`;
 
-    const config = getCreditConfig();
-    const balance = getCreditBalance();
-    const pct = Math.min(100, Math.round((balance / config.limit) * 100));
-    document.getElementById("credit-balance").textContent = `$${balance.toFixed(2)} / $${config.limit}`;
-    document.getElementById("credit-bar-fill").style.width = pct + "%";
+    const creditExpenses = expenses.filter(e => e.method === "credit").reduce((s, e) => s + e.amount, 0);
+    const creditPayments = expenses.filter(e => e.method === "payment").reduce((s, e) => s + e.amount, 0);
+    const balance = Math.max(0, creditExpenses - creditPayments);
+    const pct = Math.min(100, Math.round((balance / 500) * 100));
+    document.getElementById("credit-balance").textContent = `$${balance.toFixed(2)} / $500`;
     const barFill = document.getElementById("credit-bar-fill");
-    if (pct >= 70) {
-      barFill.style.background = "var(--rust)";
-    } else if (pct >= 40) {
-      barFill.style.background = "var(--ochre)";
-    } else {
-      barFill.style.background = "var(--sage-deep)";
-    }
+    barFill.style.width = pct + "%";
+    barFill.style.background = pct >= 70 ? "var(--rust)" : pct >= 40 ? "var(--ochre)" : "var(--sage-deep)";
   }
 
-  // To-Do card
+  // ---------- To-Do card ----------
   function renderTodos() {
     const list = document.getElementById("todo-today-list");
     const todos = getTodos(key);
@@ -201,6 +204,16 @@
     if (e.key === "Enter") document.getElementById("todo-today-add").click();
   });
 
+  // ---------- Refresh habits when tab becomes visible again ----------
+  // This handles the case where you log a habit on another page/tab
+  // and come back to Today — it re-reads localStorage immediately.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      refreshAllChecks();
+      renderMoneyCard();
+    }
+  });
+
   // ---------- Init ----------
   renderStreaks();
   renderSchedule();
@@ -208,14 +221,17 @@
   renderMoneyCard();
   renderTodos();
 
-  bindCheck(document.getElementById("check-bible"), document.getElementById("stamp-bible"), "bible");
-  bindCheck(document.getElementById("check-gym"), document.getElementById("stamp-gym"), "gym");
-  bindCheck(document.getElementById("check-trading"), document.getElementById("stamp-trading"), "trading");
-  bindCheck(document.getElementById("check-food"), document.getElementById("stamp-food"), "food");
-  bindCheck(document.getElementById("check-sleep"), document.getElementById("stamp-sleep"), "sleep");
+  // Bind checkbox click handlers
+  ["bible", "gym", "trading", "food", "sleep"].forEach(habitKey => {
+    const controlEl = document.getElementById(`check-${habitKey}`);
+    const stampEl = document.getElementById(`stamp-${habitKey}`);
+    if (controlEl) bindCheck(controlEl, stampEl, habitKey);
+  });
 
-  // Insert check icons
+  // Insert check icons and set initial state
   document.querySelectorAll(".check-control").forEach(el => {
     el.innerHTML = checkIcon();
   });
+  refreshAllChecks();
+
 })();
