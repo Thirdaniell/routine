@@ -1,40 +1,88 @@
-The Log — Personal Routine Tracker
-A personal field-log style dashboard to organize your day: Bible study, gym training,
-trading discipline, food, sleep, schedule, and money/credit management.
-Hosting on GitHub Pages
-Create a new repository on GitHub (e.g. `the-log` or `routine-tracker`).
-Upload all the files/folders from this project, keeping the folder structure:
+# The Log — Personal Field Record
+
+A personal daily routine tracker hosted on GitHub Pages. Covers Bible study,
+gym training, trading discipline, food, sleep, money management, and more.
+Built with a field-log aesthetic — dark ink background, bone paper cards,
+ochre accents.
+
+## Live site
+https://thirdaniell.github.io/routine/
+
+## Stack
+- **Frontend** — plain HTML/CSS/JS, hosted on GitHub Pages
+- **Backend** — Cloudflare Worker (`tracker-worker.daniel-mouldd.workers.dev`)
+- **Database** — Notion (Tracker — Life Log database)
+- **Local cache** — localStorage (habits, schedule, to-dos, gym log, settings)
+
+## Pages
+
+| Page | Path | Description |
+|---|---|---|
+| Today | `index.html` | Daily dashboard — habits, schedule, XP bar, to-do list |
+| Planner | `pages/planner.html` | Month calendar with per-day schedule and to-dos |
+| Workout Routines | `pages/workout-routines.html` | 5-day split reference |
+| Gym Log | `pages/gym-log.html` | Log sets/reps per session, track personal bests |
+| Bible Study | `pages/bible.html` | Log sessions, streaks, notes → syncs to Notion |
+| Trading | `pages/trading.html` | Pre-session checklist, session log → syncs to Notion |
+| Money & Credit | `pages/money.html` | Expenses, income, BMO credit card, savings → syncs to Notion |
+| Food | `pages/food.html` | Daily meal checklist and eating guidelines |
+| Weekly Review | `pages/weekly-review.html` | Habit grid, gym table, money analytics, journal → syncs to Notion |
+| Achievements | `pages/achievements.html` | XP, levels (Retail → Master), badges, daily missions |
+| Settings | `pages/settings.html` | Profile, sleep/wake times, credit card, workout days |
+| Migration | `migrate.html` | One-time tool to push localStorage data to Notion |
+
+## Data storage
+
+### Syncs to Notion (persistent, cross-device)
+- Bible study sessions
+- Trading sessions
+- Expenses, income, credit card payments
+- Savings contributions and goal
+- Weekly journal entries
+
+### localStorage only (device-specific, resets are fine)
+- Daily habit checkboxes
+- Schedule items
+- To-do lists
+- Gym session logs (sets/reps)
+- Food meal logs
+- Settings and preferences
+- XP and achievements
+
+## Gamification
+- **XP** earned for each habit checked off
+- **Streak multipliers** — 3 days ×1.25, 7 days ×1.5, 14 days ×1.75, 30 days ×2.0
+- **Levels** — Retail → Trader → Analyst → Strategist → Specialist → Master
+- **Achievements** — 20 unlockable badges
+- **Daily missions** — auto-generated challenges each day
+
+## PWA (installable app)
+The site is installable on iPhone and Android via "Add to Home Screen".
+Icons live in `icons/icon-192.png` and `icons/icon-512.png`.
+Service worker handles offline caching — HTML and JS are network-first
+so updates from GitHub deploy automatically.
+
+## Updating the site
+1. Edit files and push to GitHub — HTML/JS pages update automatically
+2. If you change CSS or images, bump the version in `sw.js`:
+   `const CACHE = "thelog-v2";` (increment each time)
+
+## Cloudflare Worker
+Worker code lives in `tracker-worker/src/index.js`.
+Secrets set in Cloudflare dashboard:
+- `NOTION_TOKEN` — Notion integration token
+- `NOTION_DB` — `009a83b9067f4575b75ab9e4efcf6862`
+
+To redeploy after changes:
+```bash
+cd tracker-worker
+npx wrangler deploy
 ```
-   index.html
-   css/styles.css
-   js/data.js
-   js/app.js
-   data/routines.js
-   pages/*.html
-   ```
-In your repo, go to Settings → Pages.
-Under Build and deployment, set Source to Deploy from a branch, pick `main`
-(or `master`) and `/ (root)`, then save.
-After a minute or two, your site will be live at:
-`https://<your-username>.github.io/<repo-name>/`
-How data is stored
-All your data (habits, schedule, expenses, income, savings, etc.) is currently saved
-in your browser's localStorage. This means:
-Your data stays on whichever device/browser you use it on.
-Since you'll be switching between laptop and phone, this is a known limitation —
-a future upgrade will move this to a small cloud database (Supabase) so everything
-syncs across devices automatically. The data layer (`js/data.js`) is already written
-so this swap won't require rebuilding the pages.
-In the meantime, you can clear your browser data accidentally and lose progress —
-consider this a "v1" to get the habit loop going.
-Current pages
-Today (`index.html`) — daily dashboard: schedule timeline, habit checklist
-(Bible, Gym, Trading, Food, Sleep), and a Money & Credit snapshot.
-Workout Routines (`pages/workout-routines.html`) — your full 5-day split.
-Money & Credit (`pages/money.html`) — log expenses (debit/credit), income,
-BMO credit card utilization, and a savings goal tracker.
-Bible Study / Trading / Food / Weekly Review — placeholder pages, coming next.
-What's next
-Build out Bible Study, Trading, and Food pages
-Build the Weekly Review page (pulls habit % stats + journaling prompts)
-Optional: move data storage to Supabase for cross-device sync
+
+## Notion database
+Single database: **Tracker — Life Log**
+ID: `009a83b9067f4575b75ab9e4efcf6862`
+
+Views: Journal, Expenses, Income, Bible Study, Trading, Savings
+
+All entries have a `Type` property that filters them into the correct view.
