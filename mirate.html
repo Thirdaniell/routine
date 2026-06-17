@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Log — Data Migration</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .migrate-card {
+      background: var(--bone);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      padding: 28px;
+      max-width: 600px;
+      margin-bottom: 24px;
+    }
+    .migrate-card h2 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .migrate-card p {
+      font-size: 0.9rem;
+      color: var(--text-dark-dim);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+    .log-area {
+      background: var(--ink);
+      color: var(--text-light);
+      border-radius: var(--radius);
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      max-height: 340px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+    .log-line { display: block; }
+    .log-line.ok { color: var(--sage); }
+    .log-line.skip { color: var(--ochre); }
+    .log-line.err { color: var(--rust); }
+    .log-line.info { color: var(--text-light-dim); }
+    .progress-bar-track {
+      height: 8px;
+      background: var(--line-bone);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--sage-deep);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="masthead">
+      <div>
+        <div class="masthead-meta">Personal Field Log</div>
+        <h1 class="masthead-title">Data Migration<span>.</span></h1>
+      </div>
+      <a href="index.html" class="masthead-date" style="text-decoration:none;">← Back to Today</a>
+    </header>
+
+    <div class="migrate-card">
+      <h2>Migrate localStorage → Notion</h2>
+      <p>
+        This tool reads all your existing data (Bible study sessions, trading sessions, expenses,
+        income, savings) from this browser's localStorage and sends it to Notion so it syncs
+        across all your devices. <strong>Run this once on your laptop.</strong>
+        It's safe to click — if you've already migrated, it will do nothing.
+      </p>
+      <button class="btn" id="migrate-btn">Run migration</button>
+      <div class="progress-bar-track" id="progress-track" style="display:none;">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="log-area" id="log-area" style="display:none;"></div>
+    </div>
+
+    <div class="footer-note">The Log · A daily field record</div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    const MIGRATION_FLAG = "ftrack_migrated_v1";
+    const logArea = document.getElementById("log-area");
+    const progressFill = document.getElementById("progress-fill");
+    const progressTrack = document.getElementById("progress-track");
+
+    function log(msg, type = "info") {
+      const line = document.createElement("span");
+      line.className = `log-line ${type}`;
+      line.textContent = msg;
+      logArea.appendChild(line);
+      logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    function setProgress(pct) {
+      progressFill.style.width = pct + "%";
+    }
+
+    function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms));
+    }
+
+    document.getElementById("migrate-btn").addEventListener("click", async () => {
+      const btn = document.getElementById("migrate-btn");
+
+      if (localStorage.getItem(MIGRATION_FLAG)) {
+        logArea.style.display = "block";
+        log("✓ Migration already completed. No duplicates will be created.", "skip");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Migrating...";
+      logArea.style.display = "block";
+      progressTrack.style.display = "block";
+
+      let total = 0;
+      let done = 0;
+      let errors = 0;
+
+      // ---- Count total items ----
+      const bibleEntries = (() => { try { return JSON.parse(localStorage.getItem("ftrack_bible_entries") || "[]"); } catch { return []; } })();
+      const tradingSessions = (() => { try { return JSON.parse(localStorage.getItem("ftrack_trading_sessions") || "[]"); } catch { return []; } })();
+      const expenses = getExpenses();
+      const income = getIncome();
+      const savings = getSavings();
+      const savingsContribs = savings.contributions || [];
+      const savingsGoal = savings.goal || 0;
+      const reviews = (() => { try { return Object.entries(JSON.parse(localStorage.getItem("ftrack_reviews") || "{}")); } catch { return []; } })();
+
+      total = bibleEntries.length + tradingSessions.length + expenses.length + income.length + savingsContribs.length + (savingsGoal > 0 ? 1 : 0) + reviews.length;
+
+      if (total === 0) {
+        log("No local data found to migrate. You're starting fresh — that's fine!", "skip");
+        localStorage.setItem(MIGRATION_FLAG, "1");
+        btn.textContent = "Nothing to migrate";
+        return;
+      }
+
+      log(`Found ${total} items to migrate. Starting...`, "info");
+      await sleep(400);
+
+      function tick(label, success) {
+        done++;
+        setProgress(Math.round((done / total) * 100));
+        if (success) {
+          log(`✓ ${label}`, "ok");
+        } else {
+          log(`✗ ${label} — failed (saved locally only)`, "err");
+          errors++;
+        }
+      }
+
+      // ---- Bible entries ----
+      if (bibleEntries.length > 0) {
+        log(`\nMigrating ${bibleEntries.length} Bible study sessions...`, "info");
+        for (const entry of bibleEntries) {
+          try {
+            await apiFetch("/bible", "POST", {
+              date: entry.date,
+              passage: entry.passage,
+              duration: entry.duration,
+              notes: entry.notes || ""
+            });
+            tick(`Bible: ${entry.passage} (${entry.date})`, true);
+          } catch (e) {
+            tick(`Bible: ${entry.passage} (${entry.date})`, false);
+          }
+          await sleep(150);
+        }
+      }
+
+      // ---- Trading sessions ----
+      if (tradingSessions.length > 0) {
+        log(`\nMigrating ${tradingSessions.length} trading sessions...`, "info");
+        for (const s of tradingSessions) {
+          try {
+            await apiFetch("/trading", "POST", {
+              date: s.date,
+              session: s.session,
+              result: s.result,
+              checksCompleted: s.checksCompleted,
+              notes: s.notes || ""
+            });
+            tick(`Trading: ${s.session} session (${s.date}) — ${s.result}`, true);
+          } catch (e) {
+            tick(`Trading: ${s.session} (${s.date})`, false);
+          }
+          await sleep(150);
+        }
+      }
+
+      // ---- Expenses ----
+      if (expenses.length > 0) {
+        log(`\nMigrating ${expenses.length} expenses...`, "info");
+        for (const e of expenses) {
+          try {
+            await apiFetch("/expenses", "POST", {
+              date: e.date,
+              description: e.description,
+              amount: e.amount,
+              category: e.category,
+              method: e.method
+            });
+            tick(`Expense: ${e.description} $${e.amount} (${e.date})`, true);
+          } catch (err) {
+            tick(`Expense: ${e.description} (${e.date})`, false);
+          }
+          await sleep(150);
+        }
+      }
+
+      // ---- Income ----
+      if (income.length > 0) {
+        log(`\nMigrating ${income.length} income entries...`, "info");
+        for (const e of income) {
+          try {
+            await apiFetch("/income", "POST", {
+              date: e.date,
+              source: e.source,
+              amount: e.amount
+            });
+            tick(`Income: ${e.source} $${e.amount} (${e.date})`, true);
+          } catch (err) {
+            tick(`Income: ${e.source} (${e.date})`, false);
+          }
+          await sleep(150);
+        }
+      }
+
+      // ---- Savings goal ----
+      if (savingsGoal > 0) {
+        try {
+          await apiFetch("/savings", "POST", {
+            date: todayKey(),
+            amount: savingsGoal,
+            note: "Savings goal",
+            type: "savings-goal"
+          });
+          tick(`Savings goal: $${savingsGoal}`, true);
+        } catch (e) {
+          tick(`Savings goal: $${savingsGoal}`, false);
+        }
+        await sleep(150);
+      }
+
+      // ---- Savings contributions ----
+      if (savingsContribs.length > 0) {
+        log(`\nMigrating ${savingsContribs.length} savings contributions...`, "info");
+        for (const c of savingsContribs) {
+          try {
+            await apiFetch("/savings", "POST", {
+              date: c.date,
+              amount: c.amount,
+              note: c.note || "",
+              type: "savings"
+            });
+            tick(`Savings: $${c.amount} (${c.date})`, true);
+          } catch (e) {
+            tick(`Savings: $${c.amount} (${c.date})`, false);
+          }
+          await sleep(150);
+        }
+      }
+
+      // ---- Weekly reviews / journal ----
+      if (reviews.length > 0) {
+        log(`\nMigrating ${reviews.length} weekly journal entries...`, "info");
+        for (const [weekKey, review] of reviews) {
+          try {
+            await apiFetch("/journal", "POST", {
+              weekKey,
+              wins: review.wins || "",
+              struggles: review.struggles || "",
+              adjustments: review.adjustments || ""
+            });
+            tick(`Journal: week of ${weekKey}`, true);
+          } catch (e) {
+            tick(`Journal: week of ${weekKey}`, false);
+          }
+          await sleep(150);
+        }
+      }
+
+      // ---- Done ----
+      await sleep(300);
+      setProgress(100);
+
+      if (errors === 0) {
+        log(`\n✓ Migration complete! All ${total} items saved to Notion.`, "ok");
+        log("Your data will now sync across all your devices.", "ok");
+        localStorage.setItem(MIGRATION_FLAG, "1");
+        btn.textContent = "Migration complete ✓";
+      } else {
+        log(`\n⚠ Migration finished with ${errors} error(s). Those items remain in localStorage only.`, "err");
+        log("You can try running the migration again — already-migrated items are skipped.", "skip");
+        btn.disabled = false;
+        btn.textContent = "Retry migration";
+      }
+    });
+  </script>
+</body>
+</html>
