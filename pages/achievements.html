@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Log — Achievements</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .xp-panel { background: var(--bone); color: var(--text-dark); border-radius: var(--radius); padding: 24px; margin-bottom: 28px; }
+    .level-title { font-family: var(--font-display); font-size: 2.2rem; font-weight: 600; color: var(--text-dark); }
+    .xp-bar-track { height: 12px; background: var(--line-bone); border-radius: 6px; overflow: hidden; margin: 12px 0 6px; }
+    .xp-bar-fill { height: 100%; background: var(--ochre); border-radius: 6px; transition: width 0.5s ease; }
+    .stats-row { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 20px; }
+    .stat-item .num { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 700; color: var(--sage-deep); }
+    .stat-item .label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dark-dim); }
+    .missions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .mission-card { background: var(--bone); color: var(--text-dark); border-radius: var(--radius); padding: 16px 18px; border: 2px solid transparent; }
+    .mission-card.done { border-color: var(--sage-deep); opacity: 0.7; }
+    .mission-label { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+    .mission-xp { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ochre); }
+    .mission-done-tag { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sage-deep); margin-left: 10px; }
+    .achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+    .ach-card { background: var(--bone); color: var(--text-dark); border-radius: var(--radius); padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; }
+    .ach-card.locked { opacity: 0.35; filter: grayscale(1); }
+    .ach-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .ach-label { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; }
+    .ach-desc { font-size: 0.78rem; color: var(--text-dark-dim); }
+    .xp-log { background: var(--bone); color: var(--text-dark); border-radius: var(--radius); padding: 20px; margin-top: 28px; }
+    .xp-log h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; }
+    .xp-log-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line-bone); font-size: 0.85rem; }
+    .xp-log-row:last-child { border-bottom: none; }
+    .xp-amount { font-family: var(--font-mono); color: var(--ochre); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="masthead">
+      <div>
+        <div class="masthead-meta">Personal Field Log</div>
+        <h1 class="masthead-title">Achievements<span>.</span></h1>
+      </div>
+      <a href="../index.html" class="masthead-date" style="text-decoration:none;">← Back to Today</a>
+    </header>
+    <nav class="primary-nav">
+      <a href="../index.html">Today</a>
+      <a href="planner.html">Planner</a>
+      <a href="workout-routines.html">Workout Routines</a>
+      <a href="bible.html">Bible Study</a>
+      <a href="trading.html">Trading</a>
+      <a href="money.html">Money &amp; Credit</a>
+      <a href="food.html">Food</a>
+      <a href="weekly-review.html">Weekly Review</a>
+      <a href="achievements.html" class="active">Achievements</a>
+    </nav>
+
+    <!-- Level & XP panel -->
+    <div class="xp-panel">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
+        <div class="level-title" id="level-title">Retail</div>
+        <div style="font-family:var(--font-mono);font-size:0.9rem;color:var(--text-dark-dim);" id="xp-total">0 XP</div>
+      </div>
+      <div class="xp-bar-track"><div class="xp-bar-fill" id="xp-fill" style="width:0%"></div></div>
+      <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dark-dim);text-align:right;" id="xp-next"></div>
+      <div class="stats-row">
+        <div class="stat-item"><div class="num" id="stat-streak">0</div><div class="label">Day streak</div></div>
+        <div class="stat-item"><div class="num" id="stat-multiplier">×1</div><div class="label">XP multiplier</div></div>
+        <div class="stat-item"><div class="num" id="stat-achievements">0</div><div class="label">Achievements</div></div>
+        <div class="stat-item"><div class="num" id="stat-level">1</div><div class="label">Level</div></div>
+      </div>
+    </div>
+
+    <!-- Daily missions -->
+    <div class="section-label">Today's missions</div>
+    <div class="missions-grid" id="missions-grid"></div>
+
+    <!-- Achievements -->
+    <div class="section-label">Achievements</div>
+    <div class="achievements-grid" id="achievements-grid"></div>
+
+    <!-- XP log -->
+    <div class="xp-log">
+      <h3>Recent XP</h3>
+      <div id="xp-log-list"></div>
+    </div>
+
+    <div class="footer-note">The Log · A daily field record</div>
+  </div>
+
+  <script src="../data/routines.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/gamify.js"></script>
+  <script>
+    const xp = getTotalXP();
+    const level = getLevelForXP(xp);
+    const next = getNextLevel(xp);
+    const streak = getOverallStreak();
+    const multiplier = getStreakMultiplier(streak);
+    const data = initGamifyData();
+
+    // Level panel
+    document.getElementById("level-title").textContent = `${level.title} · Lv.${level.level}`;
+    document.getElementById("xp-total").textContent = xp.toLocaleString() + " XP";
+    const pct = next ? Math.round(((xp - level.xpRequired) / (next.xpRequired - level.xpRequired)) * 100) : 100;
+    document.getElementById("xp-fill").style.width = pct + "%";
+    document.getElementById("xp-next").textContent = next ? `${(next.xpRequired - xp).toLocaleString()} XP to ${next.title}` : "Max rank achieved";
+    document.getElementById("stat-streak").textContent = streak;
+    document.getElementById("stat-multiplier").textContent = "×" + multiplier;
+    document.getElementById("stat-achievements").textContent = data.unlockedAchievements.length;
+    document.getElementById("stat-level").textContent = level.level;
+
+    // Daily missions
+    const missions = getDailyMissions(todayKey());
+    const mgrid = document.getElementById("missions-grid");
+    missions.forEach(m => {
+      const card = document.createElement("div");
+      card.className = "mission-card" + (m.done ? " done" : "");
+      card.innerHTML = `
+        <div class="mission-label">
+          ${m.done ? "✓ " : ""}${m.label}
+          ${m.done ? '<span class="mission-done-tag">Complete</span>' : ""}
+        </div>
+        <div class="mission-xp">+${m.xp} XP</div>
+      `;
+      mgrid.appendChild(card);
+    });
+
+    // Achievements
+    const unlocked = new Set(data.unlockedAchievements);
+    const agrid = document.getElementById("achievements-grid");
+    // Show unlocked first, then locked
+    const sorted = [...ACHIEVEMENTS].sort((a, b) => {
+      const aU = unlocked.has(a.id) ? 0 : 1;
+      const bU = unlocked.has(b.id) ? 0 : 1;
+      return aU - bU;
+    });
+    sorted.forEach(ach => {
+      const isUnlocked = unlocked.has(ach.id);
+      const card = document.createElement("div");
+      card.className = "ach-card" + (isUnlocked ? "" : " locked");
+      card.innerHTML = `
+        <div class="ach-icon">${ach.icon}</div>
+        <div>
+          <div class="ach-label">${ach.label}</div>
+          <div class="ach-desc">${ach.desc}</div>
+        </div>
+      `;
+      agrid.appendChild(card);
+    });
+
+    // XP log
+    const logEl = document.getElementById("xp-log-list");
+    const HABIT_NAMES = { bible:"Bible Study", gym:"Gym", trading:"Trading", food:"Food", sleep:"Sleep" };
+    const recent = (data.xpLog || []).slice(0, 20);
+    if (recent.length === 0) {
+      logEl.innerHTML = `<div style="font-size:0.85rem;color:var(--text-dark-dim);font-style:italic;">No XP earned yet — start logging habits!</div>`;
+    } else {
+      logEl.innerHTML = recent.map(entry => `
+        <div class="xp-log-row">
+          <div>
+            <span style="color:var(--text-dark);">${HABIT_NAMES[entry.reason] || entry.reason}</span>
+            <span style="color:var(--text-dark-dim);font-size:0.78rem;margin-left:8px;">${entry.date}</span>
+            ${entry.multiplier > 1 ? `<span style="color:var(--ochre);font-size:0.72rem;margin-left:6px;">×${entry.multiplier}</span>` : ""}
+          </div>
+          <div class="xp-amount">+${entry.amount} XP</div>
+        </div>
+      `).join("");
+    }
+  </script>
+</body>
+</html>
