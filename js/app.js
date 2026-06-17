@@ -8,6 +8,13 @@
   document.getElementById("today-date").textContent = today.toLocaleDateString("en-US", dateOptions);
   document.getElementById("today-year").textContent = today.getFullYear();
 
+  // ---------- XP bar ----------
+  function renderXPBarToday() {
+    const el = document.getElementById("xp-bar-today");
+    if (!el) return;
+    renderXPBar("xp-bar-today");
+  }
+
   // ---------- Streak strip ----------
   function renderStreaks() {
     document.getElementById("streak-overall").textContent = getOverallStreak();
@@ -120,10 +127,22 @@
 
   function bindCheck(controlEl, stampEl, habitKey) {
     controlEl.addEventListener("click", () => {
-      const day = getDay(key); // read fresh on every click
+      const day = getDay(key);
       const newVal = !(day.habits && day.habits[habitKey]);
       setHabit(key, habitKey, newVal);
+      if (newVal) {
+        const earned = awardHabitXP(habitKey, key);
+        if (earned > 0) {
+          const HABIT_NAMES = { bible:"Bible Study", gym:"Gym", trading:"Trading", food:"Food", sleep:"Sleep" };
+          showXPToast(earned, HABIT_NAMES[habitKey] || habitKey);
+          const newlyUnlocked = checkAchievements();
+          newlyUnlocked.forEach((id, i) => setTimeout(() => showAchievementToast(id), 2800 + i * 4500));
+        }
+      } else {
+        removeHabitXP(habitKey, key);
+      }
       refreshAllChecks();
+      renderXPBarToday();
     });
   }
 
@@ -211,6 +230,7 @@
     if (document.visibilityState === "visible") {
       refreshAllChecks();
       renderMoneyCard();
+      renderXPBarToday();
     }
   });
 
@@ -220,6 +240,7 @@
   renderGymCard();
   renderMoneyCard();
   renderTodos();
+  renderXPBarToday();
 
   // Bind checkbox click handlers
   ["bible", "gym", "trading", "food", "sleep"].forEach(habitKey => {
