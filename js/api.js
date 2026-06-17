@@ -1,7 +1,7 @@
 // js/api.js
 // API layer — talks to the Cloudflare Worker, falls back to localStorage if offline
 
-const WORKER_URL = "https://tracker-worker.YOUR-SUBDOMAIN.workers.dev";
+const WORKER_URL = "https://tracker-worker.daniel-mouldd.workers.dev";
 
 async function apiFetch(path, method = "GET", body = null) {
   const opts = { method, headers: { "Content-Type": "application/json" } };
