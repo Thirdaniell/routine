@@ -197,8 +197,32 @@
   </div>
 
   <script src="../js/data.js"></script>
+  <script src="../js/api.js"></script>
   <script>
     const SETTINGS_KEY = "ftrack_settings";
+
+    // Load settings from Notion on page load
+    (async function loadFromNotion() {
+      if (typeof apiGetSettings !== "function") return;
+      try {
+        const remote = await apiGetSettings();
+        if (remote && Object.keys(remote).length > 0) {
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(remote));
+          if (remote.name) document.getElementById("s-name").value = remote.name;
+          if (remote.location) document.getElementById("s-location").value = remote.location;
+          if (remote.wake) document.getElementById("s-wake").value = remote.wake;
+          if (remote.sleep) document.getElementById("s-sleep").value = remote.sleep;
+          if (remote.london) document.getElementById("s-london").value = remote.london;
+          if (remote.nyam) document.getElementById("s-nyam").value = remote.nyam;
+          const credit = remote.credit;
+          if (credit) {
+            if (credit.name) document.getElementById("s-card-name").value = credit.name;
+            if (credit.limit) document.getElementById("s-card-limit").value = credit.limit;
+            if (credit.dueDay) document.getElementById("s-card-due").value = credit.dueDay;
+          }
+        }
+      } catch(e) { console.warn("settings load failed", e); }
+    })();
 
     function getSettings() {
       try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"); } catch { return {}; }
@@ -248,6 +272,7 @@
       s.name = document.getElementById("s-name").value.trim();
       s.location = document.getElementById("s-location").value.trim();
       saveSettings(s);
+      if (typeof apiSaveSettings === 'function') apiSaveSettings(s).catch(()=>{});
       showStatus("profile-status");
     });
 
@@ -256,15 +281,19 @@
       s.wake = document.getElementById("s-wake").value;
       s.sleep = document.getElementById("s-sleep").value;
       saveSettings(s);
+      if (typeof apiSaveSettings === 'function') apiSaveSettings(s).catch(()=>{});
       showStatus("sleep-status");
     });
 
     document.getElementById("save-credit-btn").addEventListener("click", () => {
-      setCreditConfig({
+      const newCredit = {
         name: document.getElementById("s-card-name").value || "BMO Student Mastercard",
         limit: parseFloat(document.getElementById("s-card-limit").value) || 500,
         dueDay: parseInt(document.getElementById("s-card-due").value) || 1
       });
+      setCreditConfig(newCredit);
+      const cs = getSettings(); cs.credit = newCredit; saveSettings(cs);
+      if (typeof apiSaveSettings === 'function') apiSaveSettings(cs).catch(()=>{});
       showStatus("credit-status");
     });
 
@@ -273,6 +302,7 @@
       const activeDays = Array.from(daysGrid.querySelectorAll(".day-toggle.active")).map(b => parseInt(b.dataset.dow));
       s.trainingDays = activeDays;
       saveSettings(s);
+      if (typeof apiSaveSettings === 'function') apiSaveSettings(s).catch(()=>{});
       showStatus("days-status");
     });
 
@@ -281,6 +311,7 @@
       s.london = document.getElementById("s-london").value;
       s.nyam = document.getElementById("s-nyam").value;
       saveSettings(s);
+      if (typeof apiSaveSettings === 'function') apiSaveSettings(s).catch(()=>{});
       showStatus("trading-status");
     });
 
