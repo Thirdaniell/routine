@@ -24,6 +24,13 @@
   }
 
   // ---------- Schedule timeline ----------
+  async function loadScheduleFromNotion() {
+    if (typeof apiGetSchedule === "function") {
+      const items = await apiGetSchedule(key);
+      if (items) setSchedule(key, items);
+    }
+  }
+
   function renderSchedule() {
     const items = getSchedule(key);
     const rail = document.getElementById("timeline-rail");
@@ -99,7 +106,11 @@
       const label = row.querySelector('[data-field="label"]').value || "Untitled";
       return { time, label, done: false };
     });
-    setSchedule(key, items);
+    if (typeof apiSaveSchedule === "function") {
+      apiSaveSchedule(key, items).catch(e => console.warn("schedule save failed", e));
+    } else {
+      setSchedule(key, items);
+    }
     scheduleModal.classList.remove("open");
     renderSchedule();
   });
@@ -130,6 +141,11 @@
       const day = getDay(key);
       const newVal = !(day.habits && day.habits[habitKey]);
       setHabit(key, habitKey, newVal);
+      // Sync full habit day to Notion
+      if (typeof apiSaveHabits === "function") {
+        const updatedDay = getDay(key);
+        apiSaveHabits(key, updatedDay.habits || {}).catch(e => console.warn("habits save failed", e));
+      }
       if (newVal) {
         const earned = awardHabitXP(habitKey, key);
         if (earned > 0) {
@@ -215,6 +231,9 @@
     const text = input.value.trim();
     if (!text) return;
     addTodo(key, text);
+    if (typeof apiSaveTodos === "function") {
+      apiSaveTodos(key, getTodos(key)).catch(e => console.warn("todos save failed", e));
+    }
     input.value = "";
     renderTodos();
   });
@@ -235,6 +254,14 @@
   });
 
   // ---------- Init ----------
+  // Load schedule from Notion
+  loadScheduleFromNotion().then(() => renderSchedule());
+
+  // Sync gamify data from Notion on load
+  if (typeof syncGamifyFromNotion === "function") {
+    syncGamifyFromNotion().then(() => renderXPBarToday());
+  }
+
   renderStreaks();
   renderSchedule();
   renderGymCard();
