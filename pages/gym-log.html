@@ -201,8 +201,6 @@
       <a href="food.html">Food</a>
       <a href="weekly-review.html">Weekly Review</a>
       <a href="achievements.html">Achievements</a>
-      <a href="gym-log.html">Gym Log</a>
-      <a href="settings.html">Settings</a>
     </nav>
 
     <div id="today-session"></div>
@@ -223,6 +221,7 @@
 
   <script src="../data/routines.js"></script>
   <script src="../js/data.js"></script>
+  <script src="../js/api.js"></script>
   <script src="../js/gamify.js"></script>
   <script>
     const GYM_LOG_KEY = "ftrack_gym_log";
@@ -252,6 +251,8 @@
       return best;
     }
 
+    // Async init
+    (async function init() {
     const split = getSplitDayForDate(today);
     const sessionArea = document.getElementById("today-session");
     const blocksArea = document.getElementById("exercise-blocks");
@@ -272,8 +273,20 @@
         </div>`;
       saveArea.style.display = "block";
 
-      const log = getGymLog();
-      const existing = log[todayK] || { exercises: [] };
+      // Load today's session from Notion
+    let log = {};
+    if (typeof apiGetGym === "function") {
+      try {
+        const remote = await apiGetGym(todayK);
+        if (remote) log[todayK] = remote;
+        // Also load past sessions
+        const allRemote = await apiGetGym();
+        allRemote.forEach(s => { if (s.date) log[s.date] = s; });
+      } catch(e) { console.warn("gym load failed", e); log = getGymLog(); }
+    } else {
+      log = getGymLog();
+    }
+    const existing = log[todayK] || { exercises: [] };
 
       split.exercises.forEach((ex, exIdx) => {
         const savedEx = existing.exercises.find(e => e.name === ex.name) || { name: ex.name, sets: [], notes: "" };
@@ -380,6 +393,9 @@
           exercises
         };
         saveGymLog(log);
+        if (typeof apiSaveGym === "function") {
+          apiSaveGym(log[todayK]).catch(e => console.warn("gym save failed", e));
+        }
 
         // Mark gym habit as done if at least one exercise has a completed set
         const anythingDone = exercises.some(e => e.sets.some(s => s.done));
@@ -395,9 +411,22 @@
       });
     }
 
+    })(); // end async init
+
     // Past sessions
     function renderPastSessions() {
-      const log = getGymLog();
+      let log = getGymLog();
+      // Merge with any Notion data already loaded
+      if (typeof apiGetGym === "function") {
+        apiGetGym().then(allSessions => {
+          allSessions.forEach(s => { if (s.date) log[s.date] = s; });
+          _renderPastSessionsFromLog(log);
+        }).catch(() => _renderPastSessionsFromLog(log));
+      } else {
+        _renderPastSessionsFromLog(log);
+      }
+    }
+    function _renderPastSessionsFromLog(log) {
       const listEl = document.getElementById("past-sessions-list");
       const entries = Object.values(log)
         .sort((a, b) => b.date.localeCompare(a.date))
@@ -456,6 +485,7 @@
     }
 
     renderPastSessions();
+    } // end _renderPastSessionsFromLog
   </script>
 </body>
 </html>
