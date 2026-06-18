@@ -47,14 +47,41 @@ const ACHIEVEMENTS = [
 ];
 
 // ---------- Storage ----------
+// In-memory cache so we don't hit the API on every single XP tick
+let _gamifyCache = null;
+
 function getGamifyData() {
+  if (_gamifyCache) return _gamifyCache;
   try {
-    return JSON.parse(localStorage.getItem(GAMIFY_KEY) || "{}");
+    const raw = localStorage.getItem(GAMIFY_KEY);
+    _gamifyCache = raw ? JSON.parse(raw) : {};
+    return _gamifyCache;
   } catch { return {}; }
 }
 
 function saveGamifyData(data) {
+  _gamifyCache = data;
   localStorage.setItem(GAMIFY_KEY, JSON.stringify(data));
+  // Async save to Notion — don't block UI
+  if (typeof apiSaveGamify === "function") {
+    apiSaveGamify(data).catch(e => console.warn("gamify sync failed", e));
+  }
+}
+
+// Call this on page load to pull latest from Notion into cache
+async function syncGamifyFromNotion() {
+  if (typeof apiGetGamify !== "function") return;
+  try {
+    const remote = await apiGetGamify();
+    if (remote && typeof remote.xp === "number") {
+      // Use whichever has more XP (in case of conflict, trust the higher value)
+      const local = getGamifyData();
+      if (remote.xp >= (local.xp || 0)) {
+        _gamifyCache = remote;
+        localStorage.setItem(GAMIFY_KEY, JSON.stringify(remote));
+      }
+    }
+  } catch(e) { console.warn("gamify sync from Notion failed", e); }
 }
 
 function initGamifyData() {
