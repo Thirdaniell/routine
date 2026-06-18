@@ -165,14 +165,11 @@
       <a href="../index.html">Today</a>
       <a href="planner.html" class="active">Planner</a>
       <a href="workout-routines.html">Workout Routines</a>
-      <a href="gym-log.html">Gym Log</a>
       <a href="bible.html">Bible Study</a>
       <a href="trading.html">Trading</a>
       <a href="money.html">Money &amp; Credit</a>
       <a href="food.html">Food</a>
       <a href="weekly-review.html">Weekly Review</a>
-      <a href="achievements.html">Achievements</a>
-      <a href="settings.html">Settings</a>
     </nav>
 
     <p style="font-size:0.85rem;color:var(--text-light-dim);max-width:640px;margin-bottom:20px;">
@@ -436,6 +433,7 @@
     todoList.addEventListener("change", (e) => {
       if (e.target.dataset.toggle) {
         toggleTodo(activeKey, e.target.dataset.toggle);
+        if (typeof apiSaveTodos === "function") apiSaveTodos(activeKey, getTodos(activeKey)).catch(()=>{});
         renderTodoRows();
         renderCalendar();
       }
@@ -446,6 +444,7 @@
       const text = input.value.trim();
       if (!text) return;
       addTodo(activeKey, text);
+      if (typeof apiSaveTodos === "function") apiSaveTodos(activeKey, getTodos(activeKey)).catch(()=>{});
       input.value = "";
       renderTodoRows();
       renderCalendar();
@@ -463,7 +462,11 @@
     document.getElementById("day-modal-save").addEventListener("click", () => {
       const rows = Array.from(schedList.children).filter(r => r.classList.contains("sched-row"));
       const items = rows.map((_, i) => readRow(i));
-      setSchedule(activeKey, items);
+      if (typeof apiSaveSchedule === "function") {
+        apiSaveSchedule(activeKey, items).catch(()=>{});
+      } else {
+        setSchedule(activeKey, items);
+      }
       dayModal.classList.remove("open");
       renderCalendar();
     });
