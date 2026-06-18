@@ -45,15 +45,12 @@
       <a href="../index.html">Today</a>
       <a href="planner.html">Planner</a>
       <a href="workout-routines.html">Workout Routines</a>
-      <a href="gym-log.html">Gym Log</a>
       <a href="bible.html">Bible Study</a>
       <a href="trading.html">Trading</a>
       <a href="money.html">Money &amp; Credit</a>
       <a href="food.html">Food</a>
       <a href="weekly-review.html">Weekly Review</a>
       <a href="achievements.html" class="active">Achievements</a>
-
-      <a href="settings.html">Settings</a>
     </nav>
 
     <!-- Level & XP panel -->
@@ -91,8 +88,13 @@
 
   <script src="../data/routines.js"></script>
   <script src="../js/data.js"></script>
+  <script src="../js/api.js"></script>
   <script src="../js/gamify.js"></script>
   <script>
+    // Sync gamify from Notion first, then render
+    (async function() {
+      if (typeof syncGamifyFromNotion === "function") await syncGamifyFromNotion();
+    })();
     const xp = getTotalXP();
     const level = getLevelForXP(xp);
     const next = getNextLevel(xp);
