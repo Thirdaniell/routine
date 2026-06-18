@@ -2,7 +2,7 @@
 // IMPORTANT: bump the version number below every time you push updates to GitHub
 // e.g. "thelog-v1" -> "thelog-v2" -> "thelog-v3" etc.
 // This forces the old cache to be deleted and all files to be re-downloaded.
-const CACHE = "thelog-v1";
+const CACHE = "thelog-v2";
 
 const STATIC = [
   "/routine/",
