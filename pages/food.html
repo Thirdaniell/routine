@@ -97,7 +97,6 @@
 </head>
 <body>
   <div class="app-shell">
-
     <header class="masthead">
       <div>
         <div class="masthead-meta">Personal Field Log</div>
@@ -105,7 +104,6 @@
       </div>
       <a href="../index.html" class="masthead-date" style="text-decoration:none;">← Back to Today</a>
     </header>
-
     <nav class="primary-nav">
       <a href="../index.html">Today</a>
       <a href="planner.html">Planner</a>
@@ -119,11 +117,9 @@
       <a href="achievements.html">Achievements</a>
       <a href="settings.html">Settings</a>
     </nav>
-
     <p style="font-size:0.85rem;color:var(--text-light-dim);max-width:600px;margin-bottom:24px;">
       Track your meals for today. Check off each meal when eaten on time. Notes save automatically.
     </p>
-
     <!-- Eating guidelines -->
     <div class="guidelines">
       <h3>Eating guidelines</h3>
@@ -134,24 +130,19 @@
       <div class="guide-item"><div class="dot"></div><span>Drink at least 2.5–3L of water daily. Start the morning with a full glass.</span></div>
       <div class="guide-item"><div class="dot"></div><span>Prep meals when possible — don't leave eating to chance on busy days.</span></div>
     </div>
-
     <!-- Daily meal checklist -->
     <div class="section-label">Today's meals</div>
     <div class="meal-grid" id="meal-grid"></div>
-
     <button class="btn" id="food-save-btn">Save today's log</button>
     <span class="save-status" id="food-save-status">Saved ✓</span>
-
     <div class="footer-note">The Log · A daily field record</div>
   </div>
-
   <script src="../js/data.js"></script>
   <script src="../js/api.js"></script>
   <script>
     const FOOD_KEY = "ftrack_food";
     const today = new Date();
     const key = todayKey();
-    const dow = today.getDay();
 
     const MEALS = [
       { id: "breakfast", label: "Breakfast", time: "7:00 AM", checks: ["Eaten on time", "High protein", "Complex carbs"] },
@@ -164,8 +155,7 @@
     function getFoodLog() {
       try { return JSON.parse(localStorage.getItem(FOOD_KEY) || "{}"); } catch { return {}; }
     }
-
-    function saveFoodLog(log) {
+    function saveFoodLogLocal(log) {
       localStorage.setItem(FOOD_KEY, JSON.stringify(log));
     }
 
@@ -174,26 +164,44 @@
 
     const grid = document.getElementById("meal-grid");
 
-    MEALS.forEach(meal => {
-      const saved = log[key][meal.id] || { checks: {}, notes: "" };
-      const card = document.createElement("div");
-      card.className = "meal-card";
+    function buildMealCards(dayData) {
+      grid.innerHTML = "";
+      MEALS.forEach(meal => {
+        const saved = dayData[meal.id] || { checks: {}, notes: "" };
+        const card = document.createElement("div");
+        card.className = "meal-card";
+        const checksHTML = meal.checks.map((label, i) => `
+          <div class="meal-check">
+            <input type="checkbox" id="${meal.id}-c${i}" ${saved.checks[i] ? "checked" : ""} data-meal="${meal.id}" data-check="${i}">
+            <label for="${meal.id}-c${i}">${label}</label>
+          </div>
+        `).join("");
+        card.innerHTML = `
+          <div class="meal-card-title">${meal.label}</div>
+          <div class="meal-time">${meal.time}</div>
+          ${checksHTML}
+          <textarea class="meal-notes-input" rows="2" placeholder="What did you eat?" data-meal="${meal.id}">${saved.notes || ""}</textarea>
+        `;
+        grid.appendChild(card);
+      });
+    }
 
-      const checksHTML = meal.checks.map((label, i) => `
-        <div class="meal-check">
-          <input type="checkbox" id="${meal.id}-c${i}" ${saved.checks[i] ? "checked" : ""} data-meal="${meal.id}" data-check="${i}">
-          <label for="${meal.id}-c${i}">${label}</label>
-        </div>
-      `).join("");
+    // Render local data immediately so the page isn't blank, then refresh with Notion data
+    buildMealCards(log[key]);
 
-      card.innerHTML = `
-        <div class="meal-card-title">${meal.label}</div>
-        <div class="meal-time">${meal.time}</div>
-        ${checksHTML}
-        <textarea class="meal-notes-input" rows="2" placeholder="What did you eat?" data-meal="${meal.id}">${saved.notes || ""}</textarea>
-      `;
-      grid.appendChild(card);
-    });
+    (async function loadFromNotion() {
+      if (typeof apiGetFood !== "function") return;
+      try {
+        const remote = await apiGetFood(key);
+        if (remote && Object.keys(remote).length > 0) {
+          log[key] = remote;
+          saveFoodLogLocal(log);
+          buildMealCards(log[key]);
+        }
+      } catch (e) {
+        console.warn("food load from Notion failed", e);
+      }
+    })();
 
     document.getElementById("food-save-btn").addEventListener("click", () => {
       const currentLog = getFoodLog();
@@ -208,14 +216,18 @@
         currentLog[key][meal.id] = { checks, notes };
       });
 
-      // mark food habit as done if breakfast + lunch + dinner all have at least one check
       const allMealsDone = ["breakfast","lunch","dinner"].every(id => {
         const m = currentLog[key][id];
         return m && Object.values(m.checks).some(v => v);
       });
       setHabit(key, "food", allMealsDone);
 
-      saveFoodLog(currentLog);
+      saveFoodLogLocal(currentLog);
+
+      if (typeof apiSaveFood === "function") {
+        apiSaveFood(key, currentLog[key]).catch(e => console.warn("food save to Notion failed", e));
+      }
+
       const status = document.getElementById("food-save-status");
       status.classList.add("show");
       setTimeout(() => status.classList.remove("show"), 1800);
