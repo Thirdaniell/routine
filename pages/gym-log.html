@@ -6,179 +6,35 @@
   <title>The Log — Gym Log</title>
   <link rel="stylesheet" href="../css/styles.css">
   <style>
-    .session-header {
-      background: var(--bone);
-      color: var(--text-dark);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 22px;
-    }
-    .session-header h2 {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .session-tag {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-dark-dim);
-    }
-    .exercise-block {
-      background: var(--bone);
-      color: var(--text-dark);
-      border-radius: var(--radius);
-      padding: 18px 20px;
-      margin-bottom: 14px;
-    }
-    .exercise-name {
-      font-family: var(--font-display);
-      font-size: 1.05rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .exercise-target {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.06em;
-      color: var(--ochre);
-      margin-bottom: 14px;
-    }
-    .sets-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-    .sets-table th {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-dark-dim);
-      padding: 6px 8px;
-      border-bottom: 1px solid var(--line-bone);
-      text-align: left;
-    }
-    .sets-table td {
-      padding: 6px 8px;
-      border-bottom: 1px solid var(--line-bone);
-    }
-    .sets-table tr:last-child td {
-      border-bottom: none;
-    }
-    .sets-table input {
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      background: var(--bone-soft);
-      border: 1px solid var(--line-bone);
-      border-radius: var(--radius);
-      padding: 5px 8px;
-      width: 80px;
-      color: var(--text-dark);
-      text-align: center;
-    }
-    .sets-table input:focus {
-      outline: 2px solid var(--ochre);
-    }
-    .set-num {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--text-dark-dim);
-      width: 32px;
-    }
-    .del-set-btn {
-      background: none;
-      border: none;
-      color: var(--text-dark-dim);
-      cursor: pointer;
-      font-size: 0.85rem;
-      padding: 0 4px;
-    }
+    .session-header { background: var(--bone); color: var(--text-dark); border-radius: var(--radius); padding: 20px; margin-bottom: 22px; }
+    .session-header h2 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; }
+    .session-tag { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dark-dim); }
+    .exercise-block { background: var(--bone); color: var(--text-dark); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; }
+    .exercise-name { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+    .exercise-target { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.06em; color: var(--ochre); margin-bottom: 14px; }
+    .sets-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .sets-table th { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dark-dim); padding: 6px 8px; border-bottom: 1px solid var(--line-bone); text-align: left; }
+    .sets-table td { padding: 6px 8px; border-bottom: 1px solid var(--line-bone); }
+    .sets-table tr:last-child td { border-bottom: none; }
+    .sets-table input { font-family: var(--font-mono); font-size: 0.85rem; background: var(--bone-soft); border: 1px solid var(--line-bone); border-radius: var(--radius); padding: 5px 8px; width: 80px; color: var(--text-dark); text-align: center; }
+    .sets-table input:focus { outline: 2px solid var(--ochre); }
+    .set-num { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dark-dim); width: 32px; }
+    .del-set-btn { background: none; border: none; color: var(--text-dark-dim); cursor: pointer; font-size: 0.85rem; padding: 0 4px; }
     .del-set-btn:hover { color: var(--rust); }
-    .add-set-btn {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      background: none;
-      border: 1px dashed var(--line-bone);
-      border-radius: var(--radius);
-      padding: 7px 12px;
-      color: var(--text-dark-dim);
-      cursor: pointer;
-      margin-top: 10px;
-      width: 100%;
-    }
+    .add-set-btn { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: 1px dashed var(--line-bone); border-radius: var(--radius); padding: 7px 12px; color: var(--text-dark-dim); cursor: pointer; margin-top: 10px; width: 100%; }
     .add-set-btn:hover { color: var(--sage-deep); border-color: var(--sage-deep); }
-    .past-sessions {
-      background: var(--bone);
-      color: var(--text-dark);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-top: 28px;
-    }
-    .past-sessions h3 {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 14px;
-    }
-    .past-session-row {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--line-bone);
-      cursor: pointer;
-    }
+    .past-sessions { background: var(--bone); color: var(--text-dark); border-radius: var(--radius); padding: 20px; margin-top: 28px; }
+    .past-sessions h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; }
+    .past-session-row { padding: 12px 0; border-bottom: 1px solid var(--line-bone); cursor: pointer; }
     .past-session-row:last-child { border-bottom: none; }
     .past-session-row:hover .past-session-date { color: var(--ochre); }
-    .past-session-date {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--text-dark-dim);
-      margin-bottom: 2px;
-    }
-    .past-session-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-    .past-session-summary {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--text-dark-dim);
-      margin-top: 2px;
-    }
-    .save-status {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--sage);
-      margin-left: 12px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
+    .past-session-date { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dark-dim); margin-bottom: 2px; }
+    .past-session-title { font-size: 0.9rem; font-weight: 600; }
+    .past-session-summary { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dark-dim); margin-top: 2px; }
+    .save-status { font-family: var(--font-mono); font-size: 0.72rem; color: var(--sage); margin-left: 12px; opacity: 0; transition: opacity 0.3s ease; }
     .save-status.show { opacity: 1; }
-    .rest-day-notice {
-      background: var(--ink-soft);
-      border: 1px dashed var(--line);
-      border-radius: var(--radius);
-      padding: 24px;
-      text-align: center;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      color: var(--text-light-dim);
-      margin-bottom: 22px;
-    }
-    .pb-badge {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      background: rgba(217,162,75,0.2);
-      color: var(--ochre);
-      border-radius: 3px;
-      padding: 2px 6px;
-      margin-left: 6px;
-    }
+    .rest-day-notice { background: var(--ink-soft); border: 1px dashed var(--line); border-radius: var(--radius); padding: 24px; text-align: center; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-light-dim); margin-bottom: 22px; }
+    .pb-badge { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(217,162,75,0.2); color: var(--ochre); border-radius: 3px; padding: 2px 6px; margin-left: 6px; }
   </style>
 </head>
 <body>
@@ -201,9 +57,10 @@
       <a href="food.html">Food</a>
       <a href="weekly-review.html">Weekly Review</a>
       <a href="achievements.html">Achievements</a>
+      <a href="settings.html">Settings</a>
     </nav>
 
-    <div id="today-session"></div>
+    <div id="today-session"><div style="font-size:0.88rem;color:var(--text-light-dim);font-style:italic;">Loading...</div></div>
     <div id="exercise-blocks"></div>
 
     <div id="save-area" style="display:none;margin-bottom:28px;">
@@ -213,7 +70,7 @@
 
     <div class="past-sessions">
       <h3>Past sessions</h3>
-      <div id="past-sessions-list"></div>
+      <div id="past-sessions-list"><div style="font-size:0.85rem;color:var(--text-dark-dim);font-style:italic;">Loading...</div></div>
     </div>
 
     <div class="footer-note">The Log · A daily field record</div>
@@ -224,22 +81,12 @@
   <script src="../js/api.js"></script>
   <script src="../js/gamify.js"></script>
   <script>
-    const GYM_LOG_KEY = "ftrack_gym_log";
     const today = new Date();
     const todayK = todayKey();
 
-    function getGymLog() {
-      try { return JSON.parse(localStorage.getItem(GYM_LOG_KEY) || "{}"); } catch { return {}; }
-    }
-    function saveGymLog(log) {
-      localStorage.setItem(GYM_LOG_KEY, JSON.stringify(log));
-    }
-
-    // Get personal best weight for an exercise
-    function getPersonalBest(exerciseName) {
-      const log = getGymLog();
+    function getPersonalBest(exerciseName, allSessions) {
       let best = 0;
-      Object.values(log).forEach(session => {
+      allSessions.forEach(session => {
         const ex = session.exercises && session.exercises.find(e => e.name === exerciseName);
         if (ex && ex.sets) {
           ex.sets.forEach(s => {
@@ -251,20 +98,29 @@
       return best;
     }
 
-    // Async init
-    (async function init() {
     const split = getSplitDayForDate(today);
     const sessionArea = document.getElementById("today-session");
     const blocksArea = document.getElementById("exercise-blocks");
     const saveArea = document.getElementById("save-area");
 
-    if (!split) {
-      sessionArea.innerHTML = `
-        <div class="rest-day-notice">
-          <div style="font-size:1.1rem;margin-bottom:6px;">Rest Day</div>
-          Today is a rest day — recovery is part of the program. Light walking or stretching optional.
-        </div>`;
-    } else {
+    let allSessions = [];
+
+    (async function init() {
+      // Load all sessions from Notion
+      if (typeof apiGetGym === "function") {
+        try { allSessions = await apiGetGym(); } catch (e) { console.warn("gym load failed", e); allSessions = []; }
+      }
+
+      if (!split) {
+        sessionArea.innerHTML = `
+          <div class="rest-day-notice">
+            <div style="font-size:1.1rem;margin-bottom:6px;">Rest Day</div>
+            Today is a rest day — recovery is part of the program. Light walking or stretching optional.
+          </div>`;
+        renderPastSessions();
+        return;
+      }
+
       sessionArea.innerHTML = `
         <div class="session-header">
           <div class="session-tag">Today · ${todayK}</div>
@@ -273,24 +129,11 @@
         </div>`;
       saveArea.style.display = "block";
 
-      // Load today's session from Notion
-    let log = {};
-    if (typeof apiGetGym === "function") {
-      try {
-        const remote = await apiGetGym(todayK);
-        if (remote) log[todayK] = remote;
-        // Also load past sessions
-        const allRemote = await apiGetGym();
-        allRemote.forEach(s => { if (s.date) log[s.date] = s; });
-      } catch(e) { console.warn("gym load failed", e); log = getGymLog(); }
-    } else {
-      log = getGymLog();
-    }
-    const existing = log[todayK] || { exercises: [] };
+      const existing = allSessions.find(s => s.date === todayK) || { exercises: [] };
 
-      split.exercises.forEach((ex, exIdx) => {
+      split.exercises.forEach((ex) => {
         const savedEx = existing.exercises.find(e => e.name === ex.name) || { name: ex.name, sets: [], notes: "" };
-        const pb = getPersonalBest(ex.name);
+        const pb = getPersonalBest(ex.name, allSessions);
 
         const block = document.createElement("div");
         block.className = "exercise-block";
@@ -299,37 +142,26 @@
         const targetSets = parseInt(ex.sets) || 3;
         const targetReps = ex.reps;
 
-        // Build sets rows
         function buildSetsHTML(sets) {
           if (sets.length === 0) {
-            // Pre-fill with target sets
-            for (let i = 0; i < targetSets; i++) {
-              sets.push({ weight: "", reps: "", done: false });
-            }
+            for (let i = 0; i < targetSets; i++) sets.push({ weight: "", reps: "", done: false });
           }
           return sets.map((set, i) => `
             <tr>
               <td class="set-num">Set ${i + 1}</td>
               <td><input type="number" class="weight-input" placeholder="kg" value="${set.weight || ""}" data-set="${i}" min="0" step="2.5"></td>
               <td><input type="number" class="reps-input" placeholder="${targetReps.split('-')[0] || 10}" value="${set.reps || ""}" data-set="${i}" min="0"></td>
-              <td>
-                <input type="checkbox" class="done-check" data-set="${i}" ${set.done ? "checked" : ""} style="width:16px;height:16px;accent-color:var(--sage-deep);">
-              </td>
+              <td><input type="checkbox" class="done-check" data-set="${i}" ${set.done ? "checked" : ""} style="width:16px;height:16px;accent-color:var(--sage-deep);"></td>
               <td><button class="del-set-btn" data-del="${i}">✕</button></td>
             </tr>
           `).join("");
         }
 
         block.innerHTML = `
-          <div class="exercise-name">
-            ${ex.name}
-            ${pb > 0 ? `<span class="pb-badge">PB ${pb}kg</span>` : ""}
-          </div>
+          <div class="exercise-name">${ex.name} ${pb > 0 ? `<span class="pb-badge">PB ${pb}kg</span>` : ""}</div>
           <div class="exercise-target">${ex.sets} sets · ${ex.reps}</div>
           <table class="sets-table">
-            <thead>
-              <tr><th>Set</th><th>Weight (kg)</th><th>Reps</th><th>Done</th><th></th></tr>
-            </thead>
+            <thead><tr><th>Set</th><th>Weight (kg)</th><th>Reps</th><th>Done</th><th></th></tr></thead>
             <tbody class="sets-body">${buildSetsHTML(savedEx.sets)}</tbody>
           </table>
           <button class="add-set-btn">+ Add set</button>
@@ -338,7 +170,6 @@
           </div>
         `;
 
-        // Add set
         block.querySelector(".add-set-btn").addEventListener("click", () => {
           const tbody = block.querySelector(".sets-body");
           const newIdx = tbody.children.length;
@@ -353,25 +184,18 @@
           tbody.appendChild(tr);
         });
 
-        // Delete set
         block.querySelector(".sets-body").addEventListener("click", e => {
           if (e.target.classList.contains("del-set-btn")) {
             e.target.closest("tr").remove();
-            // Renumber
-            block.querySelectorAll(".sets-body tr").forEach((tr, i) => {
-              tr.querySelector(".set-num").textContent = `Set ${i + 1}`;
-            });
+            block.querySelectorAll(".sets-body tr").forEach((tr, i) => { tr.querySelector(".set-num").textContent = `Set ${i + 1}`; });
           }
         });
 
         blocksArea.appendChild(block);
       });
 
-      // Save session
-      document.getElementById("save-session-btn").addEventListener("click", () => {
-        const log = getGymLog();
+      document.getElementById("save-session-btn").addEventListener("click", async () => {
         const exercises = [];
-
         document.querySelectorAll(".exercise-block").forEach(block => {
           const name = block.dataset.exname;
           const sets = [];
@@ -386,49 +210,35 @@
           exercises.push({ name, sets, notes });
         });
 
-        log[todayK] = {
-          date: todayK,
-          splitDay: split.day,
-          splitName: split.name,
-          exercises
-        };
-        saveGymLog(log);
-        if (typeof apiSaveGym === "function") {
-          apiSaveGym(log[todayK]).catch(e => console.warn("gym save failed", e));
-        }
+        const session = { date: todayK, splitDay: split.day, splitName: split.name, exercises };
+        await apiSaveGym(session);
 
-        // Mark gym habit as done if at least one exercise has a completed set
         const anythingDone = exercises.some(e => e.sets.some(s => s.done));
         if (anythingDone) {
           setHabit(todayK, "gym", true);
-          awardHabitXP("gym", todayK);
+          if (typeof apiSaveHabits === "function") {
+            apiSaveHabits(todayK, getDay(todayK).habits || {}).catch(()=>{});
+          }
+          if (typeof awardHabitXP === "function") awardHabitXP("gym", todayK);
         }
 
         const status = document.getElementById("save-status");
         status.classList.add("show");
         setTimeout(() => status.classList.remove("show"), 1800);
+
+        // Refresh local cache of sessions and past sessions list
+        allSessions = allSessions.filter(s => s.date !== todayK);
+        allSessions.push(session);
         renderPastSessions();
       });
-    }
 
-    })(); // end async init
+      renderPastSessions();
+    })();
 
-    // Past sessions
     function renderPastSessions() {
-      let log = getGymLog();
-      // Merge with any Notion data already loaded
-      if (typeof apiGetGym === "function") {
-        apiGetGym().then(allSessions => {
-          allSessions.forEach(s => { if (s.date) log[s.date] = s; });
-          _renderPastSessionsFromLog(log);
-        }).catch(() => _renderPastSessionsFromLog(log));
-      } else {
-        _renderPastSessionsFromLog(log);
-      }
-    }
-    function _renderPastSessionsFromLog(log) {
       const listEl = document.getElementById("past-sessions-list");
-      const entries = Object.values(log)
+      const entries = allSessions
+        .slice()
         .sort((a, b) => b.date.localeCompare(a.date))
         .filter(s => s.date !== todayK)
         .slice(0, 10);
@@ -451,14 +261,13 @@
         `;
       }).join("");
 
-      // Click to expand past session detail
       listEl.querySelectorAll(".past-session-row").forEach(row => {
         row.addEventListener("click", () => {
-          const session = log[row.dataset.date];
+          const session = allSessions.find(s => s.date === row.dataset.date);
           if (!session || !session.exercises) return;
-          const existing = row.nextElementSibling;
-          if (existing && existing.classList.contains("session-detail")) {
-            existing.remove();
+          const existingDetail = row.nextElementSibling;
+          if (existingDetail && existingDetail.classList.contains("session-detail")) {
+            existingDetail.remove();
             return;
           }
           const detail = document.createElement("div");
@@ -483,9 +292,6 @@
         });
       });
     }
-
-    renderPastSessions();
-    } // end _renderPastSessionsFromLog
   </script>
 </body>
 </html>
