@@ -6,92 +6,19 @@
   <title>The Log — Food</title>
   <link rel="stylesheet" href="../css/styles.css">
   <style>
-    .meal-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    .meal-card {
-      background: var(--bone);
-      color: var(--text-dark);
-      border-radius: var(--radius);
-      padding: 18px;
-    }
-    .meal-card-title {
-      font-family: var(--font-display);
-      font-size: 1.05rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .meal-time {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--ochre);
-      letter-spacing: 0.06em;
-      margin-bottom: 10px;
-    }
-    .meal-check {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-      margin-bottom: 6px;
-    }
-    .meal-check input[type="checkbox"] {
-      width: 16px; height: 16px;
-      accent-color: var(--sage-deep);
-    }
-    .meal-notes-input {
-      font-family: var(--font-body);
-      font-size: 0.82rem;
-      background: var(--bone-soft);
-      border: 1px solid var(--line-bone);
-      border-radius: var(--radius);
-      padding: 7px 9px;
-      width: 100%;
-      margin-top: 8px;
-      color: var(--text-dark);
-      resize: none;
-    }
-    .meal-notes-input:focus {
-      outline: 2px solid var(--ochre);
-    }
-    .guidelines {
-      background: var(--bone);
-      color: var(--text-dark);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-    .guidelines h3 {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-    .guide-item {
-      display: flex;
-      gap: 10px;
-      font-size: 0.88rem;
-      margin-bottom: 8px;
-      color: var(--text-dark-dim);
-    }
-    .guide-item .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--sage-deep);
-      margin-top: 5px;
-      flex-shrink: 0;
-    }
-    .save-status {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--sage);
-      margin-left: 12px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
+    .meal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .meal-card { background: var(--bone); color: var(--text-dark); border-radius: var(--radius); padding: 18px; }
+    .meal-card-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+    .meal-time { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ochre); letter-spacing: 0.06em; margin-bottom: 10px; }
+    .meal-check { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; margin-bottom: 6px; }
+    .meal-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--sage-deep); }
+    .meal-notes-input { font-family: var(--font-body); font-size: 0.82rem; background: var(--bone-soft); border: 1px solid var(--line-bone); border-radius: var(--radius); padding: 7px 9px; width: 100%; margin-top: 8px; color: var(--text-dark); resize: none; }
+    .meal-notes-input:focus { outline: 2px solid var(--ochre); }
+    .guidelines { background: var(--bone); color: var(--text-dark); border-radius: var(--radius); padding: 20px; margin-bottom: 24px; }
+    .guidelines h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; }
+    .guide-item { display: flex; gap: 10px; font-size: 0.88rem; margin-bottom: 8px; color: var(--text-dark-dim); }
+    .guide-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sage-deep); margin-top: 5px; flex-shrink: 0; }
+    .save-status { font-family: var(--font-mono); font-size: 0.72rem; color: var(--sage); margin-left: 12px; opacity: 0; transition: opacity 0.3s ease; }
     .save-status.show { opacity: 1; }
   </style>
 </head>
@@ -120,7 +47,6 @@
     <p style="font-size:0.85rem;color:var(--text-light-dim);max-width:600px;margin-bottom:24px;">
       Track your meals for today. Check off each meal when eaten on time. Notes save automatically.
     </p>
-    <!-- Eating guidelines -->
     <div class="guidelines">
       <h3>Eating guidelines</h3>
       <div class="guide-item"><div class="dot"></div><span>Eat within 1 hour of waking — don't skip breakfast before trading or gym.</span></div>
@@ -130,7 +56,6 @@
       <div class="guide-item"><div class="dot"></div><span>Drink at least 2.5–3L of water daily. Start the morning with a full glass.</span></div>
       <div class="guide-item"><div class="dot"></div><span>Prep meals when possible — don't leave eating to chance on busy days.</span></div>
     </div>
-    <!-- Daily meal checklist -->
     <div class="section-label">Today's meals</div>
     <div class="meal-grid" id="meal-grid"></div>
     <button class="btn" id="food-save-btn">Save today's log</button>
@@ -140,8 +65,6 @@
   <script src="../js/data.js"></script>
   <script src="../js/api.js"></script>
   <script>
-    const FOOD_KEY = "ftrack_food";
-    const today = new Date();
     const key = todayKey();
 
     const MEALS = [
@@ -151,16 +74,6 @@
       { id: "snacks",    label: "Snacks",    time: "As needed", checks: ["Healthy choice", "No late-night eating"] },
       { id: "water",     label: "Hydration", time: "All day",  checks: ["2.5L+ water", "Morning glass done"] }
     ];
-
-    function getFoodLog() {
-      try { return JSON.parse(localStorage.getItem(FOOD_KEY) || "{}"); } catch { return {}; }
-    }
-    function saveFoodLogLocal(log) {
-      localStorage.setItem(FOOD_KEY, JSON.stringify(log));
-    }
-
-    const log = getFoodLog();
-    if (!log[key]) log[key] = {};
 
     const grid = document.getElementById("meal-grid");
 
@@ -186,46 +99,41 @@
       });
     }
 
-    // Render local data immediately so the page isn't blank, then refresh with Notion data
-    buildMealCards(log[key]);
+    // Render empty first so page isn't blank, then load from Notion
+    buildMealCards({});
 
     (async function loadFromNotion() {
       if (typeof apiGetFood !== "function") return;
       try {
         const remote = await apiGetFood(key);
         if (remote && Object.keys(remote).length > 0) {
-          log[key] = remote;
-          saveFoodLogLocal(log);
-          buildMealCards(log[key]);
+          buildMealCards(remote);
         }
-      } catch (e) {
-        console.warn("food load from Notion failed", e);
-      }
+      } catch (e) { console.warn("food load failed", e); }
     })();
 
-    document.getElementById("food-save-btn").addEventListener("click", () => {
-      const currentLog = getFoodLog();
-      if (!currentLog[key]) currentLog[key] = {};
-
+    document.getElementById("food-save-btn").addEventListener("click", async () => {
+      const dayLog = {};
       MEALS.forEach(meal => {
         const checks = {};
         document.querySelectorAll(`[data-meal="${meal.id}"][data-check]`).forEach(cb => {
           checks[cb.dataset.check] = cb.checked;
         });
         const notes = document.querySelector(`textarea[data-meal="${meal.id}"]`)?.value || "";
-        currentLog[key][meal.id] = { checks, notes };
+        dayLog[meal.id] = { checks, notes };
       });
 
       const allMealsDone = ["breakfast","lunch","dinner"].every(id => {
-        const m = currentLog[key][id];
+        const m = dayLog[id];
         return m && Object.values(m.checks).some(v => v);
       });
       setHabit(key, "food", allMealsDone);
-
-      saveFoodLogLocal(currentLog);
+      if (typeof apiSaveHabits === "function") {
+        apiSaveHabits(key, getDay(key).habits || {}).catch(()=>{});
+      }
 
       if (typeof apiSaveFood === "function") {
-        apiSaveFood(key, currentLog[key]).catch(e => console.warn("food save to Notion failed", e));
+        await apiSaveFood(key, dayLog);
       }
 
       const status = document.getElementById("food-save-status");
