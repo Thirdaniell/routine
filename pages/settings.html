@@ -6,77 +6,17 @@
   <title>The Log — Settings</title>
   <link rel="stylesheet" href="../css/styles.css">
   <style>
-    .settings-section {
-      background: var(--bone);
-      color: var(--text-dark);
-      border-radius: var(--radius);
-      padding: 22px;
-      margin-bottom: 22px;
-    }
-    .settings-section h3 {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-    .settings-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-    .save-status {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--sage);
-      margin-left: 12px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
+    .settings-section { background: var(--bone); color: var(--text-dark); border-radius: var(--radius); padding: 22px; margin-bottom: 22px; }
+    .settings-section h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
+    .save-status { font-family: var(--font-mono); font-size: 0.72rem; color: var(--sage); margin-left: 12px; opacity: 0; transition: opacity 0.3s ease; }
     .save-status.show { opacity: 1; }
-    .danger-zone {
-      background: rgba(184,92,56,0.08);
-      border: 1px solid rgba(184,92,56,0.3);
-      border-radius: var(--radius);
-      padding: 22px;
-      margin-bottom: 22px;
-    }
-    .danger-zone h3 {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--rust);
-    }
-    .danger-zone p {
-      font-size: 0.85rem;
-      color: var(--text-light-dim);
-      margin-bottom: 14px;
-    }
-    .workout-days-grid {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    .day-toggle {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 8px 14px;
-      border-radius: var(--radius);
-      border: 1px solid var(--line-bone);
-      cursor: pointer;
-      background: var(--bone-soft);
-      color: var(--text-dark-dim);
-      transition: all 0.15s ease;
-    }
-    .day-toggle.active {
-      background: var(--sage);
-      color: var(--ink);
-      border-color: var(--sage);
-    }
+    .danger-zone { background: rgba(184,92,56,0.08); border: 1px solid rgba(184,92,56,0.3); border-radius: var(--radius); padding: 22px; margin-bottom: 22px; }
+    .danger-zone h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: var(--rust); }
+    .danger-zone p { font-size: 0.85rem; color: var(--text-light-dim); margin-bottom: 14px; }
+    .workout-days-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .day-toggle { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 14px; border-radius: var(--radius); border: 1px solid var(--line-bone); cursor: pointer; background: var(--bone-soft); color: var(--text-dark-dim); transition: all 0.15s ease; }
+    .day-toggle.active { background: var(--sage); color: var(--ink); border-color: var(--sage); }
   </style>
 </head>
 <body>
@@ -102,62 +42,37 @@
       <a href="settings.html" class="active">Settings</a>
     </nav>
 
-    <!-- Profile -->
     <div class="settings-section">
       <h3>Profile</h3>
       <div class="settings-grid">
-        <div class="field-group">
-          <label>Your name</label>
-          <input type="text" class="text-input" id="s-name" placeholder="e.g. Daniel">
-        </div>
-        <div class="field-group">
-          <label>Location</label>
-          <input type="text" class="text-input" id="s-location" placeholder="e.g. Brampton, ON">
-        </div>
+        <div class="field-group"><label>Your name</label><input type="text" class="text-input" id="s-name" placeholder="e.g. Daniel"></div>
+        <div class="field-group"><label>Location</label><input type="text" class="text-input" id="s-location" placeholder="e.g. Brampton, ON"></div>
       </div>
       <button class="btn btn-small" id="save-profile-btn">Save</button>
       <span class="save-status" id="profile-status">Saved ✓</span>
     </div>
 
-    <!-- Sleep & wake -->
     <div class="settings-section">
       <h3>Sleep &amp; wake targets</h3>
       <div class="settings-grid">
-        <div class="field-group">
-          <label>Wake up time</label>
-          <input type="time" class="time-input" id="s-wake" value="06:00">
-        </div>
-        <div class="field-group">
-          <label>Sleep time</label>
-          <input type="time" class="time-input" id="s-sleep" value="22:30">
-        </div>
+        <div class="field-group"><label>Wake up time</label><input type="time" class="time-input" id="s-wake" value="06:00"></div>
+        <div class="field-group"><label>Sleep time</label><input type="time" class="time-input" id="s-sleep" value="22:30"></div>
       </div>
       <button class="btn btn-small" id="save-sleep-btn">Save</button>
       <span class="save-status" id="sleep-status">Saved ✓</span>
     </div>
 
-    <!-- Credit card -->
     <div class="settings-section">
       <h3>Credit card</h3>
       <div class="settings-grid">
-        <div class="field-group">
-          <label>Card name</label>
-          <input type="text" class="text-input" id="s-card-name" placeholder="BMO Student Mastercard">
-        </div>
-        <div class="field-group">
-          <label>Credit limit ($)</label>
-          <input type="number" class="text-input" id="s-card-limit" min="0" step="50" placeholder="500">
-        </div>
-        <div class="field-group">
-          <label>Payment due day</label>
-          <input type="number" class="text-input" id="s-card-due" min="1" max="31" placeholder="1">
-        </div>
+        <div class="field-group"><label>Card name</label><input type="text" class="text-input" id="s-card-name" placeholder="BMO Student Mastercard"></div>
+        <div class="field-group"><label>Credit limit ($)</label><input type="number" class="text-input" id="s-card-limit" min="0" step="50" placeholder="500"></div>
+        <div class="field-group"><label>Payment due day</label><input type="number" class="text-input" id="s-card-due" min="1" max="31" placeholder="1"></div>
       </div>
       <button class="btn btn-small" id="save-credit-btn">Save</button>
       <span class="save-status" id="credit-status">Saved ✓</span>
     </div>
 
-    <!-- Workout days -->
     <div class="settings-section">
       <h3>Workout days</h3>
       <p style="font-size:0.85rem;color:var(--text-dark-dim);margin-bottom:12px;">Choose which days of the week are training days vs rest days.</p>
@@ -166,24 +81,16 @@
       <span class="save-status" id="days-status">Saved ✓</span>
     </div>
 
-    <!-- Trading session times -->
     <div class="settings-section">
       <h3>Trading sessions</h3>
       <div class="settings-grid">
-        <div class="field-group">
-          <label>London session start</label>
-          <input type="time" class="time-input" id="s-london" value="03:00">
-        </div>
-        <div class="field-group">
-          <label>NY AM session start</label>
-          <input type="time" class="time-input" id="s-nyam" value="09:30">
-        </div>
+        <div class="field-group"><label>London session start</label><input type="time" class="time-input" id="s-london" value="03:00"></div>
+        <div class="field-group"><label>NY AM session start</label><input type="time" class="time-input" id="s-nyam" value="09:30"></div>
       </div>
       <button class="btn btn-small" id="save-trading-btn">Save</button>
       <span class="save-status" id="trading-status">Saved ✓</span>
     </div>
 
-    <!-- Danger zone -->
     <div class="danger-zone">
       <h3>Danger zone</h3>
       <p>These actions are permanent and cannot be undone.</p>
@@ -200,36 +107,7 @@
   <script src="../js/api.js"></script>
   <script>
     const SETTINGS_KEY = "ftrack_settings";
-
-    // Load settings from Notion on page load
-    (async function loadFromNotion() {
-      if (typeof apiGetSettings !== "function") return;
-      try {
-        const remote = await apiGetSettings();
-        if (remote && Object.keys(remote).length > 0) {
-          localStorage.setItem(SETTINGS_KEY, JSON.stringify(remote));
-          if (remote.name) document.getElementById("s-name").value = remote.name;
-          if (remote.location) document.getElementById("s-location").value = remote.location;
-          if (remote.wake) document.getElementById("s-wake").value = remote.wake;
-          if (remote.sleep) document.getElementById("s-sleep").value = remote.sleep;
-          if (remote.london) document.getElementById("s-london").value = remote.london;
-          if (remote.nyam) document.getElementById("s-nyam").value = remote.nyam;
-          const credit = remote.credit;
-          if (credit) {
-            if (credit.name) document.getElementById("s-card-name").value = credit.name;
-            if (credit.limit) document.getElementById("s-card-limit").value = credit.limit;
-            if (credit.dueDay) document.getElementById("s-card-due").value = credit.dueDay;
-          }
-        }
-      } catch(e) { console.warn("settings load failed", e); }
-    })();
-
-    function getSettings() {
-      try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"); } catch { return {}; }
-    }
-    function saveSettings(s) {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
-    }
+    let currentSettings = {};
 
     function showStatus(id) {
       const el = document.getElementById(id);
@@ -237,92 +115,115 @@
       setTimeout(() => el.classList.remove("show"), 1800);
     }
 
-    // Load existing settings
-    const s = getSettings();
-    if (s.name) document.getElementById("s-name").value = s.name;
-    if (s.location) document.getElementById("s-location").value = s.location;
-    if (s.wake) document.getElementById("s-wake").value = s.wake;
-    if (s.sleep) document.getElementById("s-sleep").value = s.sleep;
+    function applySettingsToForm(s) {
+      if (s.name) document.getElementById("s-name").value = s.name;
+      if (s.location) document.getElementById("s-location").value = s.location;
+      if (s.wake) document.getElementById("s-wake").value = s.wake;
+      if (s.sleep) document.getElementById("s-sleep").value = s.sleep;
+      if (s.london) document.getElementById("s-london").value = s.london;
+      if (s.nyam) document.getElementById("s-nyam").value = s.nyam;
+      if (s.credit) {
+        if (s.credit.name) document.getElementById("s-card-name").value = s.credit.name;
+        if (s.credit.limit) document.getElementById("s-card-limit").value = s.credit.limit;
+        if (s.credit.dueDay) document.getElementById("s-card-due").value = s.credit.dueDay;
+      }
+    }
 
-    const credit = getCreditConfig();
-    document.getElementById("s-card-name").value = credit.name || "BMO Student Mastercard";
-    document.getElementById("s-card-limit").value = credit.limit || 500;
-    document.getElementById("s-card-due").value = credit.dueDay || 1;
-
-    if (s.london) document.getElementById("s-london").value = s.london;
-    if (s.nyam) document.getElementById("s-nyam").value = s.nyam;
-
-    // Workout days
+    // Workout days UI setup
     const DOW_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    const defaultTrainingDays = new Set([1,2,3,4,5]); // Mon-Fri
-    const savedDays = s.trainingDays ? new Set(s.trainingDays) : defaultTrainingDays;
+    const defaultTrainingDays = [1,2,3,4,5];
     const daysGrid = document.getElementById("workout-days-grid");
-    DOW_LABELS.forEach((label, i) => {
-      const btn = document.createElement("div");
-      btn.className = "day-toggle" + (savedDays.has(i) ? " active" : "");
-      btn.textContent = label;
-      btn.dataset.dow = i;
-      btn.addEventListener("click", () => btn.classList.toggle("active"));
-      daysGrid.appendChild(btn);
-    });
 
-    // Save handlers
-    document.getElementById("save-profile-btn").addEventListener("click", () => {
-      const s = getSettings();
-      s.name = document.getElementById("s-name").value.trim();
-      s.location = document.getElementById("s-location").value.trim();
-      saveSettings(s);
-      if (typeof apiSaveSettings === 'function') apiSaveSettings(s).catch(()=>{});
+    function buildDaysGrid(trainingDays) {
+      const activeSet = new Set(trainingDays || defaultTrainingDays);
+      daysGrid.innerHTML = "";
+      DOW_LABELS.forEach((label, i) => {
+        const btn = document.createElement("div");
+        btn.className = "day-toggle" + (activeSet.has(i) ? " active" : "");
+        btn.textContent = label;
+        btn.dataset.dow = i;
+        btn.addEventListener("click", () => btn.classList.toggle("active"));
+        daysGrid.appendChild(btn);
+      });
+    }
+    buildDaysGrid(defaultTrainingDays);
+
+    // Load from Notion
+    (async function loadSettings() {
+      // Load credit config (separate from generic settings)
+      const credit = getCreditConfig();
+      document.getElementById("s-card-name").value = credit.name || "BMO Student Mastercard";
+      document.getElementById("s-card-limit").value = credit.limit || 500;
+      document.getElementById("s-card-due").value = credit.dueDay || 1;
+
+      if (typeof apiGetSettings !== "function") return;
+      try {
+        const remote = await apiGetSettings();
+        if (remote && Object.keys(remote).length > 0) {
+          currentSettings = remote;
+          applySettingsToForm(remote);
+          if (remote.trainingDays) buildDaysGrid(remote.trainingDays);
+        }
+      } catch (e) { console.warn("settings load failed", e); }
+    })();
+
+    async function persistSettings() {
+      if (typeof apiSaveSettings === "function") {
+        await apiSaveSettings(currentSettings);
+      }
+    }
+
+    document.getElementById("save-profile-btn").addEventListener("click", async () => {
+      currentSettings.name = document.getElementById("s-name").value.trim();
+      currentSettings.location = document.getElementById("s-location").value.trim();
+      await persistSettings();
       showStatus("profile-status");
     });
 
-    document.getElementById("save-sleep-btn").addEventListener("click", () => {
-      const s = getSettings();
-      s.wake = document.getElementById("s-wake").value;
-      s.sleep = document.getElementById("s-sleep").value;
-      saveSettings(s);
-      if (typeof apiSaveSettings === 'function') apiSaveSettings(s).catch(()=>{});
+    document.getElementById("save-sleep-btn").addEventListener("click", async () => {
+      currentSettings.wake = document.getElementById("s-wake").value;
+      currentSettings.sleep = document.getElementById("s-sleep").value;
+      await persistSettings();
       showStatus("sleep-status");
     });
 
-    document.getElementById("save-credit-btn").addEventListener("click", () => {
-      const newCredit = {
+    document.getElementById("save-credit-btn").addEventListener("click", async () => {
+      const credit = {
         name: document.getElementById("s-card-name").value || "BMO Student Mastercard",
         limit: parseFloat(document.getElementById("s-card-limit").value) || 500,
         dueDay: parseInt(document.getElementById("s-card-due").value) || 1
-      });
-      setCreditConfig(newCredit);
-      const cs = getSettings(); cs.credit = newCredit; saveSettings(cs);
-      if (typeof apiSaveSettings === 'function') apiSaveSettings(cs).catch(()=>{});
+      };
+      setCreditConfig(credit);
+      currentSettings.credit = credit;
+      await persistSettings();
       showStatus("credit-status");
     });
 
-    document.getElementById("save-days-btn").addEventListener("click", () => {
-      const s = getSettings();
+    document.getElementById("save-days-btn").addEventListener("click", async () => {
       const activeDays = Array.from(daysGrid.querySelectorAll(".day-toggle.active")).map(b => parseInt(b.dataset.dow));
-      s.trainingDays = activeDays;
-      saveSettings(s);
-      if (typeof apiSaveSettings === 'function') apiSaveSettings(s).catch(()=>{});
+      currentSettings.trainingDays = activeDays;
+      await persistSettings();
       showStatus("days-status");
     });
 
-    document.getElementById("save-trading-btn").addEventListener("click", () => {
-      const s = getSettings();
-      s.london = document.getElementById("s-london").value;
-      s.nyam = document.getElementById("s-nyam").value;
-      saveSettings(s);
-      if (typeof apiSaveSettings === 'function') apiSaveSettings(s).catch(()=>{});
+    document.getElementById("save-trading-btn").addEventListener("click", async () => {
+      currentSettings.london = document.getElementById("s-london").value;
+      currentSettings.nyam = document.getElementById("s-nyam").value;
+      await persistSettings();
       showStatus("trading-status");
     });
 
-    document.getElementById("reset-xp-btn").addEventListener("click", () => {
+    document.getElementById("reset-xp-btn").addEventListener("click", async () => {
       if (!confirm("Reset all XP, levels and achievements? This cannot be undone.")) return;
       localStorage.removeItem("ftrack_gamify");
+      if (typeof apiSaveGamify === "function") {
+        await apiSaveGamify({ xp: 0, unlockedAchievements: [], xpLog: [], dailyXP: {} });
+      }
       alert("XP and achievements reset.");
     });
 
     document.getElementById("reset-all-btn").addEventListener("click", () => {
-      if (!confirm("Delete ALL local data? This cannot be undone. Notion data is unaffected.")) return;
+      if (!confirm("Delete ALL local data on this device? This cannot be undone. Notion data is unaffected.")) return;
       const keys = Object.keys(localStorage).filter(k => k.startsWith("ftrack_"));
       keys.forEach(k => localStorage.removeItem(k));
       alert("All local data cleared.");
