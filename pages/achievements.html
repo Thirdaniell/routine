@@ -91,85 +91,87 @@
   <script src="../js/api.js"></script>
   <script src="../js/gamify.js"></script>
   <script>
-    // Sync gamify from Notion first, then render
-    (async function() {
-      if (typeof syncGamifyFromNotion === "function") await syncGamifyFromNotion();
-    })();
-    const xp = getTotalXP();
-    const level = getLevelForXP(xp);
-    const next = getNextLevel(xp);
-    const streak = getOverallStreak();
-    const multiplier = getStreakMultiplier(streak);
-    const data = initGamifyData();
+    (async function render() {
+      // Wait for Notion sync BEFORE reading any gamify data
+      if (typeof syncGamifyFromNotion === "function") {
+        await syncGamifyFromNotion();
+      }
 
-    // Level panel
-    document.getElementById("level-title").textContent = `${level.title} · Lv.${level.level}`;
-    document.getElementById("xp-total").textContent = xp.toLocaleString() + " XP";
-    const pct = next ? Math.round(((xp - level.xpRequired) / (next.xpRequired - level.xpRequired)) * 100) : 100;
-    document.getElementById("xp-fill").style.width = pct + "%";
-    document.getElementById("xp-next").textContent = next ? `${(next.xpRequired - xp).toLocaleString()} XP to ${next.title}` : "Max rank achieved";
-    document.getElementById("stat-streak").textContent = streak;
-    document.getElementById("stat-multiplier").textContent = "×" + multiplier;
-    document.getElementById("stat-achievements").textContent = data.unlockedAchievements.length;
-    document.getElementById("stat-level").textContent = level.level;
+      const xp = getTotalXP();
+      const level = getLevelForXP(xp);
+      const next = getNextLevel(xp);
+      const streak = getOverallStreak();
+      const multiplier = getStreakMultiplier(streak);
+      const data = initGamifyData();
 
-    // Daily missions
-    const missions = getDailyMissions(todayKey());
-    const mgrid = document.getElementById("missions-grid");
-    missions.forEach(m => {
-      const card = document.createElement("div");
-      card.className = "mission-card" + (m.done ? " done" : "");
-      card.innerHTML = `
-        <div class="mission-label">
-          ${m.done ? "✓ " : ""}${m.label}
-          ${m.done ? '<span class="mission-done-tag">Complete</span>' : ""}
-        </div>
-        <div class="mission-xp">+${m.xp} XP</div>
-      `;
-      mgrid.appendChild(card);
-    });
+      // Level panel
+      document.getElementById("level-title").textContent = `${level.title} · Lv.${level.level}`;
+      document.getElementById("xp-total").textContent = xp.toLocaleString() + " XP";
+      const pct = next ? Math.round(((xp - level.xpRequired) / (next.xpRequired - level.xpRequired)) * 100) : 100;
+      document.getElementById("xp-fill").style.width = pct + "%";
+      document.getElementById("xp-next").textContent = next ? `${(next.xpRequired - xp).toLocaleString()} XP to ${next.title}` : "Max rank achieved";
+      document.getElementById("stat-streak").textContent = streak;
+      document.getElementById("stat-multiplier").textContent = "×" + multiplier;
+      document.getElementById("stat-achievements").textContent = data.unlockedAchievements.length;
+      document.getElementById("stat-level").textContent = level.level;
 
-    // Achievements
-    const unlocked = new Set(data.unlockedAchievements);
-    const agrid = document.getElementById("achievements-grid");
-    // Show unlocked first, then locked
-    const sorted = [...ACHIEVEMENTS].sort((a, b) => {
-      const aU = unlocked.has(a.id) ? 0 : 1;
-      const bU = unlocked.has(b.id) ? 0 : 1;
-      return aU - bU;
-    });
-    sorted.forEach(ach => {
-      const isUnlocked = unlocked.has(ach.id);
-      const card = document.createElement("div");
-      card.className = "ach-card" + (isUnlocked ? "" : " locked");
-      card.innerHTML = `
-        <div class="ach-icon">${ach.icon}</div>
-        <div>
-          <div class="ach-label">${ach.label}</div>
-          <div class="ach-desc">${ach.desc}</div>
-        </div>
-      `;
-      agrid.appendChild(card);
-    });
-
-    // XP log
-    const logEl = document.getElementById("xp-log-list");
-    const HABIT_NAMES = { bible:"Bible Study", gym:"Gym", trading:"Trading", food:"Food", sleep:"Sleep" };
-    const recent = (data.xpLog || []).slice(0, 20);
-    if (recent.length === 0) {
-      logEl.innerHTML = `<div style="font-size:0.85rem;color:var(--text-dark-dim);font-style:italic;">No XP earned yet — start logging habits!</div>`;
-    } else {
-      logEl.innerHTML = recent.map(entry => `
-        <div class="xp-log-row">
-          <div>
-            <span style="color:var(--text-dark);">${HABIT_NAMES[entry.reason] || entry.reason}</span>
-            <span style="color:var(--text-dark-dim);font-size:0.78rem;margin-left:8px;">${entry.date}</span>
-            ${entry.multiplier > 1 ? `<span style="color:var(--ochre);font-size:0.72rem;margin-left:6px;">×${entry.multiplier}</span>` : ""}
+      // Daily missions
+      const missions = getDailyMissions(todayKey());
+      const mgrid = document.getElementById("missions-grid");
+      missions.forEach(m => {
+        const card = document.createElement("div");
+        card.className = "mission-card" + (m.done ? " done" : "");
+        card.innerHTML = `
+          <div class="mission-label">
+            ${m.done ? "✓ " : ""}${m.label}
+            ${m.done ? '<span class="mission-done-tag">Complete</span>' : ""}
           </div>
-          <div class="xp-amount">+${entry.amount} XP</div>
-        </div>
-      `).join("");
-    }
+          <div class="mission-xp">+${m.xp} XP</div>
+        `;
+        mgrid.appendChild(card);
+      });
+
+      // Achievements
+      const unlocked = new Set(data.unlockedAchievements);
+      const agrid = document.getElementById("achievements-grid");
+      const sorted = [...ACHIEVEMENTS].sort((a, b) => {
+        const aU = unlocked.has(a.id) ? 0 : 1;
+        const bU = unlocked.has(b.id) ? 0 : 1;
+        return aU - bU;
+      });
+      sorted.forEach(ach => {
+        const isUnlocked = unlocked.has(ach.id);
+        const card = document.createElement("div");
+        card.className = "ach-card" + (isUnlocked ? "" : " locked");
+        card.innerHTML = `
+          <div class="ach-icon">${ach.icon}</div>
+          <div>
+            <div class="ach-label">${ach.label}</div>
+            <div class="ach-desc">${ach.desc}</div>
+          </div>
+        `;
+        agrid.appendChild(card);
+      });
+
+      // XP log
+      const logEl = document.getElementById("xp-log-list");
+      const HABIT_NAMES = { bible:"Bible Study", gym:"Gym", trading:"Trading", food:"Food", sleep:"Sleep" };
+      const recent = (data.xpLog || []).slice(0, 20);
+      if (recent.length === 0) {
+        logEl.innerHTML = `<div style="font-size:0.85rem;color:var(--text-dark-dim);font-style:italic;">No XP earned yet — start logging habits!</div>`;
+      } else {
+        logEl.innerHTML = recent.map(entry => `
+          <div class="xp-log-row">
+            <div>
+              <span style="color:var(--text-dark);">${HABIT_NAMES[entry.reason] || entry.reason}</span>
+              <span style="color:var(--text-dark-dim);font-size:0.78rem;margin-left:8px;">${entry.date}</span>
+              ${entry.multiplier > 1 ? `<span style="color:var(--ochre);font-size:0.72rem;margin-left:6px;">×${entry.multiplier}</span>` : ""}
+            </div>
+            <div class="xp-amount">+${entry.amount} XP</div>
+          </div>
+        `).join("");
+      }
+    })();
   </script>
 </body>
 </html>
