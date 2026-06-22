@@ -272,14 +272,27 @@
 
   // Async init — pull everything from Notion before rendering data-dependent UI
   (async function asyncInit() {
-    // Pull habits from Notion for today
+    // Pull ALL habit days from Notion so streaks/percentages are accurate on any device
     if (typeof apiGetHabits === "function") {
       try {
-        const remoteHabits = await apiGetHabits(key);
-        if (remoteHabits && Object.keys(remoteHabits).length > 0) {
-          HABIT_KEYS.forEach(h => setHabit(key, h, !!remoteHabits[h]));
+        // apiFetch without a date param returns all habit-day entries
+        const allRemoteHabits = await apiGetHabitsAll();
+        if (Array.isArray(allRemoteHabits) && allRemoteHabits.length > 0) {
+          allRemoteHabits.forEach(entry => {
+            if (entry.date && entry.habits) {
+              HABIT_KEYS.forEach(h => setHabit(entry.date, h, !!entry.habits[h]));
+            }
+          });
         }
-      } catch (e) { console.warn("habits load failed", e); }
+      } catch (e) {
+        // Fallback: just fetch today
+        try {
+          const remoteHabits = await apiGetHabits(key);
+          if (remoteHabits && Object.keys(remoteHabits).length > 0) {
+            HABIT_KEYS.forEach(h => setHabit(key, h, !!remoteHabits[h]));
+          }
+        } catch(e2) { console.warn("habits load failed", e2); }
+      }
     }
 
     // Pull todos from Notion for today
