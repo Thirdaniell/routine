@@ -73,13 +73,13 @@ async function syncGamifyFromNotion() {
   if (typeof apiGetGamify !== "function") return;
   try {
     const remote = await apiGetGamify();
-    if (remote && typeof remote.xp === "number") {
-      // Use whichever has more XP (in case of conflict, trust the higher value)
-      const local = getGamifyData();
-      if (remote.xp >= (local.xp || 0)) {
-        _gamifyCache = remote;
-        localStorage.setItem(GAMIFY_KEY, JSON.stringify(remote));
-      }
+    if (remote && typeof remote.xp === "number" && remote.xp > 0) {
+      // Always trust Notion data — it's the source of truth across devices
+      _gamifyCache = remote;
+      localStorage.setItem(GAMIFY_KEY, JSON.stringify(remote));
+      console.log("gamify synced from Notion:", remote.xp, "XP, level:", getLevelForXP(remote.xp).title);
+    } else {
+      console.log("gamify sync: no valid Notion data found, remote was:", JSON.stringify(remote));
     }
   } catch(e) { console.warn("gamify sync from Notion failed", e); }
 }
