@@ -19,7 +19,6 @@ const STATIC = [
   "/routine/pages/planner.html",
   "/routine/pages/weekly-review.html",
   "/routine/pages/workout-routines.html",
-  "/routine/pages/workout-routines.html",
   "/routine/manifest.json",
   "/routine/icons/icon-192.png",
   "/routine/icons/icon-512.png"
