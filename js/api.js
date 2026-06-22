@@ -171,6 +171,15 @@ async function apiGetHabits(date) {
     return day.habits || {};
   }
 }
+
+// Fetch ALL habit days from Notion (for streaks/percentages across devices)
+async function apiGetHabitsAll() {
+  try {
+    return await apiFetch("/habits");
+  } catch {
+    return [];
+  }
+}
 async function apiSaveHabits(date, habits) {
   setHabit && HABIT_KEYS.forEach(k => setHabit(date, k, habits[k] || false));
   try { return await apiFetch("/habits", "POST", { date, habits }); } catch(e) { console.warn(e); }
