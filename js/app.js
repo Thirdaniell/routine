@@ -254,20 +254,11 @@
   });
 
   // ---------- Init ----------
-  // Load schedule from Notion
-  loadScheduleFromNotion().then(() => renderSchedule());
 
-  // Sync gamify data from Notion on load
-  if (typeof syncGamifyFromNotion === "function") {
-    syncGamifyFromNotion().then(() => renderXPBarToday());
-  }
-
-  renderStreaks();
-  renderSchedule();
-  renderGymCard();
-  renderMoneyCard();
-  renderTodos();
-  renderXPBarToday();
+  // Insert check icons immediately (purely visual, no data needed)
+  document.querySelectorAll(".check-control").forEach(el => {
+    el.innerHTML = checkIcon();
+  });
 
   // Bind checkbox click handlers
   ["bible", "gym", "trading", "food", "sleep"].forEach(habitKey => {
@@ -276,10 +267,49 @@
     if (controlEl) bindCheck(controlEl, stampEl, habitKey);
   });
 
-  // Insert check icons and set initial state
-  document.querySelectorAll(".check-control").forEach(el => {
-    el.innerHTML = checkIcon();
-  });
-  refreshAllChecks();
+  // Render static parts immediately (no Notion data needed)
+  renderGymCard();
+
+  // Async init — pull everything from Notion before rendering data-dependent UI
+  (async function asyncInit() {
+    // Pull habits from Notion for today
+    if (typeof apiGetHabits === "function") {
+      try {
+        const remoteHabits = await apiGetHabits(key);
+        if (remoteHabits && Object.keys(remoteHabits).length > 0) {
+          HABIT_KEYS.forEach(h => setHabit(key, h, !!remoteHabits[h]));
+        }
+      } catch (e) { console.warn("habits load failed", e); }
+    }
+
+    // Pull todos from Notion for today
+    if (typeof apiGetTodos === "function") {
+      try {
+        const remoteTodos = await apiGetTodos(key);
+        if (remoteTodos && remoteTodos.length > 0) setTodos(key, remoteTodos);
+      } catch (e) { console.warn("todos load failed", e); }
+    }
+
+    // Pull schedule from Notion for today
+    if (typeof apiGetSchedule === "function") {
+      try {
+        const remoteSchedule = await apiGetSchedule(key);
+        if (remoteSchedule) setSchedule(key, remoteSchedule);
+      } catch (e) { console.warn("schedule load failed", e); }
+    }
+
+    // Sync gamify/XP from Notion
+    if (typeof syncGamifyFromNotion === "function") {
+      try { await syncGamifyFromNotion(); } catch (e) { console.warn("gamify sync failed", e); }
+    }
+
+    // Now render everything with fresh data
+    refreshAllChecks();
+    renderStreaks();
+    renderSchedule();
+    renderMoneyCard();
+    renderTodos();
+    renderXPBarToday();
+  })();
 
 })();
