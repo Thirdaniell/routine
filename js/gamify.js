@@ -60,6 +60,16 @@ function getGamifyData() {
 }
 
 function saveGamifyData(data) {
+  // Trim to stay under Notion's 2000 char rich_text limit
+  if (data.xpLog && data.xpLog.length > 20) data.xpLog = data.xpLog.slice(0, 20);
+  if (data.dailyXP) {
+    const keys = Object.keys(data.dailyXP).sort().reverse();
+    if (keys.length > 60) {
+      const trimmed = {};
+      keys.slice(0, 60).forEach(k => { trimmed[k] = data.dailyXP[k]; });
+      data.dailyXP = trimmed;
+    }
+  }
   _gamifyCache = data;
   localStorage.setItem(GAMIFY_KEY, JSON.stringify(data));
   // Async save to Notion — don't block UI
